@@ -1,0 +1,64 @@
+/* 贤书·置换 主题变量 —— 微信朋友圈风格（白底 / 黑字 / 微信绿点缀） */
+
+/* 色彩 */
+$ink: #191919;          // 主文字（近黑）
+$ink-soft: #7F7F7F;     // 次要文字（灰）
+$paper: #FFFFFF;        // 页面背景（白）
+$paper-deep: #F5F5F5;   // 浅灰（输入底 / 分隔 / 点赞栏）
+$paper-light: #FFFFFF;  // 卡片（白）
+$cinnabar: #07C160;     // 微信绿（点缀 / 强调 / 按钮）
+$cinnabar-light: #3AD27F;
+$gold: #C9A86A;         // 保留（未使用）
+$stone: #05A652;        // 辅助绿（略深）
+
+/* 行为色 */
+$uni-color-primary: $cinnabar;
+$uni-color-success: $stone;
+$uni-color-warning: #FA9D3B;
+$uni-color-error: #FA5151;
+
+/* 文字 */
+$uni-text-color: $ink;
+$uni-text-color-inverse: #FFFFFF;
+$uni-text-color-grey: $ink-soft;
+$uni-text-color-placeholder: #B2B2B2;
+$uni-text-color-disable: #CCCCCC;
+
+/* 背景 */
+$uni-bg-color: $paper-light;
+$uni-bg-color-grey: $paper;
+$uni-bg-color-hover: $paper-deep;
+$uni-bg-color-mask: rgba(0, 0, 0, 0.55);
+
+/* 边框 */
+$uni-border-color: #EBEBEB;
+
+/* 尺寸 */
+$uni-font-size-sm: 12px;
+$uni-font-size-base: 14px;
+$uni-font-size-lg: 16px;
+
+$uni-img-size-sm: 20px;
+$uni-img-size-base: 26px;
+$uni-img-size-lg: 40px;
+
+/* 圆角 */
+$uni-border-radius-sm: 4px;
+$uni-border-radius-base: 8px;
+$uni-border-radius-lg: 14px;
+$uni-border-radius-circle: 50%;
+
+/* 间距 */
+$uni-spacing-row-sm: 5px;
+$uni-spacing-row-base: 10px;
+$uni-spacing-row-lg: 15px;
+
+$uni-spacing-col-sm: 4px;
+$uni-spacing-col-base: 8px;
+$uni-spacing-col-lg: 12px;
+
+/* 透明度 */
+$uni-opacity-disabled: 0.35;
+
+/* 字体 */
+$font-serif: "Songti SC", "STSong", "SimSun", "Noto Serif SC", serif;

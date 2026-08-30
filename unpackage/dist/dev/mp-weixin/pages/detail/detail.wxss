@@ -1,0 +1,132 @@
+/* 贤书·置换 主题变量 —— 微信朋友圈风格（白底 / 黑字 / 微信绿点缀） */
+/* 色彩 */
+/* 行为色 */
+/* 文字 */
+/* 背景 */
+/* 边框 */
+/* 尺寸 */
+/* 圆角 */
+/* 间距 */
+/* 透明度 */
+/* 字体 */
+.page.data-v-eca06f3c {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  box-sizing: border-box;
+}
+.body.data-v-eca06f3c {
+  flex: 1;
+  height: 0;
+}
+.feed.data-v-eca06f3c {
+  padding: 20rpx 24rpx 0;
+}
+.comments-title.data-v-eca06f3c {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 40rpx 8rpx 20rpx;
+}
+.comments-count.data-v-eca06f3c {
+  font-size: 26rpx;
+  color: #7F7F7F;
+}
+.comments.data-v-eca06f3c {
+  padding: 10rpx 8rpx;
+}
+.cm-item.data-v-eca06f3c {
+  padding: 22rpx 0;
+  border-bottom: 1rpx solid rgba(0, 0, 0, 0.06);
+}
+.cm-item.data-v-eca06f3c:last-child {
+  border-bottom: none;
+}
+.cm-head.data-v-eca06f3c {
+  display: flex;
+}
+.cm-avatar.data-v-eca06f3c {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  color: #FFFFFF;
+  font-size: 30rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.cm-main.data-v-eca06f3c {
+  margin-left: 20rpx;
+  flex: 1;
+  min-width: 0;
+}
+.cm-nick.data-v-eca06f3c {
+  font-size: 26rpx;
+  color: #05A652;
+  font-weight: 600;
+}
+.cm-text.data-v-eca06f3c {
+  margin-top: 6rpx;
+  font-size: 28rpx;
+  color: #191919;
+  line-height: 1.7;
+  word-break: break-all;
+}
+.cm-time.data-v-eca06f3c {
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: #7F7F7F;
+}
+.cm-empty.data-v-eca06f3c {
+  padding: 60rpx 0;
+  text-align: center;
+  font-size: 26rpx;
+  color: #7F7F7F;
+}
+.feed-bottom.data-v-eca06f3c {
+  height: 40rpx;
+}
+.not-found.data-v-eca06f3c {
+  padding: 200rpx 0;
+  text-align: center;
+  color: #7F7F7F;
+}
+
+/* 输入条 */
+.input-bar.data-v-eca06f3c {
+  display: flex;
+  align-items: center;
+  padding: 16rpx 24rpx;
+  padding-bottom: calc(16rpx + env(safe-area-inset-bottom));
+  background: #FFFFFF;
+  border-top: 1rpx solid #EBEBEB;
+}
+.input.data-v-eca06f3c {
+  flex: 1;
+  height: 76rpx;
+  background: #F5F5F5;
+  border-radius: 999rpx;
+  padding: 0 30rpx;
+  font-size: 28rpx;
+  color: #191919;
+}
+.input-ph.data-v-eca06f3c {
+  color: #B2B2B2;
+}
+.send.data-v-eca06f3c {
+  width: 84rpx;
+  height: 76rpx;
+  margin-left: 18rpx;
+  border-radius: 999rpx;
+  background: linear-gradient(145deg, #3AD27F, #07C160);
+  color: #FFFFFF;
+  font-size: 34rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.send.disabled.data-v-eca06f3c {
+  opacity: 0.4;
+}

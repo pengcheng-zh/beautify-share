@@ -1,0 +1,54 @@
+{
+  "pages": [
+    "pages/splash/splash",
+    "pages/onboard/gender/gender",
+    "pages/tabBar/books/books",
+    "pages/tabBar/mine/mine",
+    "pages/publish/publish",
+    "pages/detail/detail",
+    "pages/mine/profile-edit",
+    "pages/mine/records",
+    "pages/mine/likes",
+    "pages/mine/favorites",
+    "pages/mine/shares",
+    "pages/admin/audit"
+  ],
+  "window": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "贤书·置换",
+    "navigationBarBackgroundColor": "#FFFFFF",
+    "backgroundColor": "#FFFFFF",
+    "backgroundColorTop": "#FFFFFF",
+    "backgroundColorBottom": "#FFFFFF"
+  },
+  "tabBar": {
+    "color": "#7F7F7F",
+    "selectedColor": "#07C160",
+    "borderStyle": "white",
+    "backgroundColor": "#FFFFFF",
+    "list": [
+      {
+        "pagePath": "pages/tabBar/books/books",
+        "iconPath": "static/tab/books.png",
+        "selectedIconPath": "static/tab/books-active.png",
+        "text": "书斋"
+      },
+      {
+        "pagePath": "pages/tabBar/mine/mine",
+        "iconPath": "static/tab/mine.png",
+        "selectedIconPath": "static/tab/mine-active.png",
+        "text": "我的"
+      }
+    ]
+  },
+  "lazyCodeLoading": "requiredComponents",
+  "permission": {
+    "scope.userLocation": {
+      "desc": "用于在发布内容时展示书市位置"
+    },
+    "scope.record": {
+      "desc": "用于录制语音发布内容"
+    }
+  },
+  "usingComponents": {}
+}

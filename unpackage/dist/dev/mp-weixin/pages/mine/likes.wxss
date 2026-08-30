@@ -1,0 +1,56 @@
+/* 贤书·置换 主题变量 —— 微信朋友圈风格（白底 / 黑字 / 微信绿点缀） */
+/* 色彩 */
+/* 行为色 */
+/* 文字 */
+/* 背景 */
+/* 边框 */
+/* 尺寸 */
+/* 圆角 */
+/* 间距 */
+/* 透明度 */
+/* 字体 */
+.page.data-v-07df22d1 {
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+.head.data-v-07df22d1 {
+  padding: 34rpx 40rpx 10rpx;
+}
+.head-title.data-v-07df22d1 {
+  font-size: 38rpx;
+  font-weight: 700;
+  color: #191919;
+  letter-spacing: 4rpx;
+}
+.head-sub.data-v-07df22d1 {
+  display: block;
+  margin-top: 10rpx;
+  font-size: 24rpx;
+  color: #7F7F7F;
+}
+.list.data-v-07df22d1 {
+  padding: 20rpx 24rpx;
+}
+.empty.data-v-07df22d1 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 140rpx 0;
+}
+.empty-char.data-v-07df22d1 {
+  width: 100rpx;
+  height: 100rpx;
+  border: 3rpx solid #7F7F7F;
+  border-radius: 12rpx;
+  color: #7F7F7F;
+  font-size: 54rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.4;
+}
+.empty-text.data-v-07df22d1 {
+  margin-top: 26rpx;
+  color: #7F7F7F;
+  font-size: 26rpx;
+}

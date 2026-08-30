@@ -1,0 +1,31 @@
+{
+  "name": "xianshu-zhihuan",
+  "displayName": "贤书·置换",
+  "version": "1.0.0",
+  "description": "人间烟火，书市清灵。一个雅致的旧书置换与书市分享社区。",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": "",
+  "author": "",
+  "license": "MIT",
+  "dependencies": {},
+  "uni-app": {
+    "scripts": {
+      "hello-uniapp-demo": {
+        "title": "贤书·置换 演示网站",
+        "env": {
+          "UNI_PLATFORM": "h5"
+        },
+        "define": {
+          "H5-DEMO": true
+        }
+      }
+    }
+  },
+  "engines": {
+    "HBuilderX": "^3.1.0",
+    "uni-app": "^4.03",
+    "uni-app-x": ""
+  }
+}

@@ -1,0 +1,78 @@
+/* 贤书·置换 主题变量 —— 微信朋友圈风格（白底 / 黑字 / 微信绿点缀） */
+/* 色彩 */
+/* 行为色 */
+/* 文字 */
+/* 背景 */
+/* 边框 */
+/* 尺寸 */
+/* 圆角 */
+/* 间距 */
+/* 透明度 */
+/* 字体 */
+.page.data-v-5fd503fa {
+  min-height: 100vh;
+  background: #FFFFFF;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 60rpx 80rpx;
+  box-sizing: border-box;
+}
+.title.data-v-5fd503fa {
+  font-size: 44rpx;
+  font-weight: 600;
+  color: #191919;
+  letter-spacing: 4rpx;
+}
+.sub.data-v-5fd503fa {
+  margin-top: 16rpx;
+  font-size: 26rpx;
+  color: #7F7F7F;
+}
+.options.data-v-5fd503fa {
+  margin-top: 90rpx;
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+}
+.option.data-v-5fd503fa {
+  width: 260rpx;
+  height: 300rpx;
+  border-radius: 24rpx;
+  border: 3rpx solid #EBEBEB;
+  background: #FFFFFF;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+.option.active.data-v-5fd503fa {
+  border-color: #07C160;
+  box-shadow: 0 8rpx 24rpx rgba(7, 193, 96, 0.18);
+}
+.opt-img.data-v-5fd503fa {
+  width: 160rpx;
+  height: 160rpx;
+}
+.opt-label.data-v-5fd503fa {
+  margin-top: 24rpx;
+  font-size: 34rpx;
+  color: #191919;
+  letter-spacing: 6rpx;
+}
+.next.data-v-5fd503fa {
+  margin-top: 100rpx;
+  width: 100%;
+  text-align: center;
+  padding: 26rpx 0;
+  border-radius: 16rpx;
+  background: #07C160;
+  color: #FFFFFF;
+  font-size: 32rpx;
+  letter-spacing: 8rpx;
+}
+.next.disabled.data-v-5fd503fa {
+  opacity: 0.4;
+}

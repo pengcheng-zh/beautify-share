@@ -1,0 +1,113 @@
+/* 贤书·置换 主题变量 —— 微信朋友圈风格（白底 / 黑字 / 微信绿点缀） */
+/* 色彩 */
+/* 行为色 */
+/* 文字 */
+/* 背景 */
+/* 边框 */
+/* 尺寸 */
+/* 圆角 */
+/* 间距 */
+/* 透明度 */
+/* 字体 */
+.page.data-v-9d4f95ad {
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+/* 顶部 */
+.banner.data-v-9d4f95ad {
+  padding: 36rpx 40rpx 8rpx;
+}
+.banner-head.data-v-9d4f95ad {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.banner-title.data-v-9d4f95ad {
+  font-size: 52rpx;
+  font-weight: 700;
+  color: #191919;
+  letter-spacing: 8rpx;
+}
+.banner-sub.data-v-9d4f95ad {
+  display: block;
+  margin-top: 14rpx;
+  font-size: 26rpx;
+  color: #7F7F7F;
+  letter-spacing: 4rpx;
+}
+.banner-rule.data-v-9d4f95ad {
+  display: flex;
+  align-items: center;
+  margin-top: 18rpx;
+}
+.rule-line.data-v-9d4f95ad {
+  flex: 1;
+  height: 2rpx;
+  background: rgba(0, 0, 0, 0.18);
+}
+.rule-dot.data-v-9d4f95ad {
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+  background: #07C160;
+  margin: 0 12rpx;
+}
+.feed.data-v-9d4f95ad {
+  padding: 20rpx 24rpx 0;
+}
+
+/* 空态 */
+.empty.data-v-9d4f95ad {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 160rpx 0;
+}
+.empty-char.data-v-9d4f95ad {
+  width: 110rpx;
+  height: 110rpx;
+  border: 3rpx solid #7F7F7F;
+  border-radius: 12rpx;
+  color: #7F7F7F;
+  font-size: 60rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.4;
+}
+.empty-text.data-v-9d4f95ad {
+  margin-top: 30rpx;
+  color: #7F7F7F;
+  font-size: 26rpx;
+}
+
+/* 悬浮按钮 */
+.fab.data-v-9d4f95ad {
+  position: fixed;
+  right: 44rpx;
+  bottom: 180rpx;
+  width: 110rpx;
+  height: 110rpx;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #3AD27F, #07C160);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 12rpx 28rpx rgba(7, 193, 96, 0.45);
+  z-index: 100;
+  transition: transform 0.15s ease;
+}
+.fab.data-v-9d4f95ad:active {
+  transform: scale(0.92);
+}
+.fab-plus.data-v-9d4f95ad {
+  color: #FFFFFF;
+  font-size: 60rpx;
+  font-weight: 300;
+  line-height: 1;
+  margin-top: -6rpx;
+}
+.tab-placeholder.data-v-9d4f95ad {
+  height: 40rpx;
+}

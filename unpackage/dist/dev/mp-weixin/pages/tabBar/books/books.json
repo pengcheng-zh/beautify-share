@@ -1,0 +1,10 @@
+{
+  "navigationBarTitleText": "书斋",
+  "navigationBarBackgroundColor": "#FFFFFF",
+  "navigationBarTextStyle": "black",
+  "enablePullDownRefresh": true,
+  "backgroundColor": "#FFFFFF",
+  "usingComponents": {
+    "content-card": "../../../components/content-card/content-card"
+  }
+}

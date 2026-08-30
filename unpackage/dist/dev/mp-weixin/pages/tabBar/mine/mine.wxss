@@ -1,0 +1,199 @@
+/* 贤书·置换 主题变量 —— 微信朋友圈风格（白底 / 黑字 / 微信绿点缀） */
+/* 色彩 */
+/* 行为色 */
+/* 文字 */
+/* 背景 */
+/* 边框 */
+/* 尺寸 */
+/* 圆角 */
+/* 间距 */
+/* 透明度 */
+/* 字体 */
+.page.data-v-ca643e16 {
+  padding: 24rpx 24rpx 40rpx;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+/* 头部 */
+.profile.data-v-ca643e16 {
+  padding: 40rpx 34rpx;
+  display: flex;
+  align-items: center;
+}
+.avatar.data-v-ca643e16 {
+  width: 130rpx;
+  height: 130rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+  box-shadow: inset 0 -8rpx 16rpx rgba(0, 0, 0, 0.12);
+}
+.avatar-text.data-v-ca643e16 {
+  color: #FFFFFF;
+  font-size: 56rpx;
+  font-weight: 600;
+}
+.avatar-img.data-v-ca643e16 {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+.p-info.data-v-ca643e16 {
+  margin-left: 30rpx;
+  flex: 1;
+  min-width: 0;
+}
+.p-name-row.data-v-ca643e16 {
+  display: flex;
+  align-items: center;
+}
+.p-name.data-v-ca643e16 {
+  font-size: 40rpx;
+  font-weight: 700;
+  color: #191919;
+}
+.p-role.data-v-ca643e16 {
+  margin-left: 16rpx;
+  font-size: 22rpx;
+  color: #FFFFFF;
+  background: #05A652;
+  padding: 4rpx 16rpx;
+  border-radius: 8rpx;
+}
+.p-sign.data-v-ca643e16 {
+  display: block;
+  margin-top: 12rpx;
+  font-size: 26rpx;
+  color: #7F7F7F;
+  line-height: 1.6;
+}
+.p-loc.data-v-ca643e16 {
+  margin-top: 10rpx;
+  display: flex;
+  align-items: center;
+  font-size: 24rpx;
+  color: #05A652;
+}
+.pin.data-v-ca643e16 {
+  width: 16rpx;
+  height: 16rpx;
+  border: 3rpx solid #05A652;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  margin-right: 12rpx;
+  margin-bottom: 2rpx;
+}
+.p-edit.data-v-ca643e16 {
+  margin-left: 16rpx;
+  font-size: 22rpx;
+  color: #7F7F7F;
+  flex-shrink: 0;
+}
+
+/* 统计 */
+.stats.data-v-ca643e16 {
+  margin-top: 20rpx;
+  padding: 26rpx 0;
+  display: flex;
+}
+.stat.data-v-ca643e16 {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-right: 1rpx solid #EBEBEB;
+}
+.stat.data-v-ca643e16:last-child {
+  border-right: none;
+}
+.stat-num.data-v-ca643e16 {
+  font-size: 40rpx;
+  font-weight: 700;
+  color: #07C160;
+}
+.stat-label.data-v-ca643e16 {
+  margin-top: 6rpx;
+  font-size: 24rpx;
+  color: #7F7F7F;
+}
+
+/* 分组 */
+.group.data-v-ca643e16 {
+  margin-top: 20rpx;
+  padding: 10rpx 30rpx;
+}
+.group-title.data-v-ca643e16 {
+  padding: 18rpx 0 10rpx;
+  font-size: 26rpx;
+  color: #7F7F7F;
+  letter-spacing: 4rpx;
+}
+.row.data-v-ca643e16 {
+  display: flex;
+  align-items: center;
+  padding: 26rpx 0;
+  border-bottom: 1rpx solid #EBEBEB;
+}
+.group .row.data-v-ca643e16:last-child {
+  border-bottom: none;
+}
+.row-icon.data-v-ca643e16 {
+  width: 60rpx;
+  height: 60rpx;
+  border-radius: 14rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30rpx;
+  color: #FFFFFF;
+  margin-right: 24rpx;
+  flex-shrink: 0;
+}
+.row-icon-book.data-v-ca643e16 {
+  background: #05A652;
+}
+.row-icon-like.data-v-ca643e16 {
+  background: #07C160;
+}
+.row-icon-fav.data-v-ca643e16 {
+  background: #E6A23C;
+}
+.row-icon-share.data-v-ca643e16 {
+  background: #5B8FF9;
+}
+.row-icon-admin.data-v-ca643e16 {
+  background: #9254DE;
+}
+.row-text.data-v-ca643e16 {
+  flex: 1;
+  font-size: 30rpx;
+  color: #191919;
+}
+.row-num.data-v-ca643e16 {
+  font-size: 26rpx;
+  color: #7F7F7F;
+  margin-right: 10rpx;
+}
+.badge.data-v-ca643e16 {
+  font-size: 22rpx;
+  color: #fff;
+  background: #07C160;
+  padding: 4rpx 16rpx;
+  border-radius: 999rpx;
+  margin-right: 10rpx;
+}
+.row-arrow.data-v-ca643e16 {
+  color: #7F7F7F;
+  font-size: 40rpx;
+}
+.foot.data-v-ca643e16 {
+  margin-top: 50rpx;
+  text-align: center;
+  font-size: 24rpx;
+  color: rgba(122, 112, 98, 0.7);
+  letter-spacing: 2rpx;
+}
