@@ -16,30 +16,47 @@
 
 /* 顶部 */
 .banner.data-v-9d4f95ad {
-  padding: 36rpx 40rpx 8rpx;
+  padding: 40rpx 44rpx 8rpx;
 }
 .banner-head.data-v-9d4f95ad {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
-.banner-title.data-v-9d4f95ad {
-  font-size: 52rpx;
+
+/* 左右两个大字 */
+.banner-char.data-v-9d4f95ad {
+  font-size: 78rpx;
   font-weight: 700;
+  line-height: 1;
   color: #191919;
-  letter-spacing: 8rpx;
+  text-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.06);
+}
+
+/* 中间标语 */
+.banner-center.data-v-9d4f95ad {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 18rpx;
+}
+.center-rule.data-v-9d4f95ad {
+  width: 40rpx;
+  height: 2rpx;
+  background: rgba(0, 0, 0, 0.15);
 }
 .banner-sub.data-v-9d4f95ad {
-  display: block;
-  margin-top: 14rpx;
+  margin: 0 14rpx;
   font-size: 26rpx;
   color: #7F7F7F;
   letter-spacing: 4rpx;
+  white-space: nowrap;
 }
 .banner-rule.data-v-9d4f95ad {
   display: flex;
   align-items: center;
-  margin-top: 18rpx;
+  margin-top: 24rpx;
 }
 .rule-line.data-v-9d4f95ad {
   flex: 1;

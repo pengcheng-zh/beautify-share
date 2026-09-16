@@ -3,9 +3,14 @@
 		<!-- 顶部氛围 -->
 		<view class="banner">
 			<view class="banner-head">
-				<text class="banner-title">闲书</text>
+				<text class="banner-char">闲</text>
+				<view class="banner-center">
+					<view class="center-rule"></view>
+					<text class="banner-sub">人间烟火，书市清灵</text>
+					<view class="center-rule"></view>
+				</view>
+				<text class="banner-char">书</text>
 			</view>
-			<text class="banner-sub">人间烟火，书市清灵。</text>
 			<view class="banner-rule">
 				<view class="rule-line"></view>
 				<view class="rule-dot"></view>
@@ -90,7 +95,7 @@
 
 	/* 顶部 */
 	.banner {
-		padding: 36rpx 40rpx 8rpx;
+		padding: 40rpx 44rpx 8rpx;
 	}
 
 	.banner-head {
@@ -99,25 +104,42 @@
 		justify-content: space-between;
 	}
 
-	.banner-title {
-		font-size: 52rpx;
+	/* 左右两个大字 */
+	.banner-char {
+		font-size: 78rpx;
 		font-weight: 700;
+		line-height: 1;
 		color: $ink;
-		letter-spacing: 8rpx;
+		text-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.06);
+	}
+
+	/* 中间标语 */
+	.banner-center {
+		flex: 1;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		margin: 0 18rpx;
+	}
+
+	.center-rule {
+		width: 40rpx;
+		height: 2rpx;
+		background: rgba(0, 0, 0, 0.15);
 	}
 
 	.banner-sub {
-		display: block;
-		margin-top: 14rpx;
+		margin: 0 14rpx;
 		font-size: 26rpx;
 		color: $ink-soft;
 		letter-spacing: 4rpx;
+		white-space: nowrap;
 	}
 
 	.banner-rule {
 		display: flex;
 		align-items: center;
-		margin-top: 18rpx;
+		margin-top: 24rpx;
 	}
 
 	.rule-line {
