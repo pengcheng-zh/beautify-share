@@ -31,7 +31,7 @@
         "pagePath": "pages/tabBar/books/books",
         "iconPath": "static/tab/books.png",
         "selectedIconPath": "static/tab/books-active.png",
-        "text": "书斋"
+        "text": "贤书"
       },
       {
         "pagePath": "pages/tabBar/mine/mine",
@@ -45,10 +45,10 @@
   "permission": {
     "scope.userLocation": {
       "desc": "用于在发布内容时展示书市位置"
-    },
-    "scope.record": {
-      "desc": "用于录制语音发布内容"
     }
   },
+  "requiredPrivateInfos": [
+    "chooseLocation"
+  ],
   "usingComponents": {}
 }

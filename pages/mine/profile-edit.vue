@@ -6,7 +6,7 @@
 			<view class="avatar-row" @click="chooseAvatar">
 				<view class="avatar" :style="{ background: avatarBg }">
 					<image v-if="form.avatar" class="avatar-img" :src="form.avatar" mode="aspectFill" />
-					<text v-else class="avatar-text">{{ (form.nickname || '书').slice(0, 1) }}</text>
+					<text v-else class="avatar-text">{{ (form.nickname || '新').slice(0, 1) }}</text>
 				</view>
 				<view class="avatar-side">
 					<text class="avatar-tip">点击更换头像</text>
@@ -59,7 +59,7 @@
 		},
 		computed: {
 			avatarBg() {
-				const name = this.form.nickname || '书'
+				const name = this.form.nickname || '新'
 				let h = 0
 				for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) % 997
 				return AVATAR_COLORS[h % AVATAR_COLORS.length]
@@ -70,8 +70,8 @@
 			const u = this.userStore.user || {}
 			this.form = {
 				avatar: u.avatar || '',
-				nickname: u.nickname || '',
-				sign: u.sign || '',
+				nickname: u.nickname || '新用户',
+				description: u.description || '',
 				location: u.location || ''
 			}
 		},

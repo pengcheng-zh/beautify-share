@@ -10,7 +10,7 @@ const _sfc_main = {
   },
   computed: {
     avatarBg() {
-      const name = this.form.nickname || "书";
+      const name = this.form.nickname || "新";
       let h = 0;
       for (let i = 0; i < name.length; i++)
         h = (h * 31 + name.charCodeAt(i)) % 997;
@@ -22,8 +22,8 @@ const _sfc_main = {
     const u = this.userStore.user || {};
     this.form = {
       avatar: u.avatar || "",
-      nickname: u.nickname || "",
-      sign: u.sign || "",
+      nickname: u.nickname || "新用户",
+      description: u.description || "",
       location: u.location || ""
     };
   },
@@ -85,7 +85,7 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
   }, $data.form.avatar ? {
     b: $data.form.avatar
   } : {
-    c: common_vendor.t(($data.form.nickname || "书").slice(0, 1))
+    c: common_vendor.t(($data.form.nickname || "新").slice(0, 1))
   }, {
     d: $options.avatarBg,
     e: $data.form.avatar

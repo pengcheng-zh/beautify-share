@@ -6,7 +6,7 @@
 		</view>
 		<view class="list">
 			<content-card v-for="c in list" :key="c.id" :content="c" />
-			<view v-if="!list.length" class="empty">
+			<view v-if="!list.length && !loading" class="empty">
 				<text class="empty-char">赞</text>
 				<text class="empty-text">还没有赞过的书帖</text>
 			</view>
@@ -15,7 +15,7 @@
 </template>
 
 <script>
-	import { useContentStore } from '@/store/content.js'
+	import { postApi } from '@/common/api.js'
 	import contentCard from '@/components/content-card/content-card.vue'
 
 	export default {
@@ -24,16 +24,30 @@
 		},
 		data() {
 			return {
-				list: []
+				list: [],
+				loading: false
 			}
 		},
 		onShow() {
-			this._store = useContentStore()
-			this._store.init()
-			this.list = this._store.myLiked()
+			this.loadList()
 		},
 		onUnload() {
 			this.list = []
+		},
+		methods: {
+			async loadList() {
+				if (this.loading) return
+				this.loading = true
+				try {
+					// 我点赞过的书帖：GET /post/like-list
+					const res = await postApi.likeList({ page: 1, pageSize: 50 })
+					this.list = (res && res.data) || res.data || []
+				} catch (e) {
+					console.warn('[likes] loadList failed', e)
+				} finally {
+					this.loading = false
+				}
+			}
 		}
 	}
 </script>

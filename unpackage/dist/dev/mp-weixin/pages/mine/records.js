@@ -1,48 +1,64 @@
 "use strict";
-const store_content = require("../../store/content.js");
-const common_format = require("../../common/format.js");
 const common_vendor = require("../../common/vendor.js");
+const common_api = require("../../common/api.js");
+const common_format = require("../../common/format.js");
 const contentCard = () => "../../components/content-card/content-card.js";
+const TAB_STATUS = ["", "A", "P", "R"];
 const _sfc_main = {
   components: {
     contentCard
   },
   data() {
     return {
-      current: 0
+      current: 0,
+      list: [],
+      loading: false
     };
   },
   computed: {
-    contentStore() {
-      return this._store;
-    },
-    myContents() {
-      return this._store ? this._store.myContents() : [];
-    },
     tabs() {
       return [
-        { name: "全部", count: this.myContents.length },
-        { name: "待审核", count: this.myContents.filter((c) => c.status === "pending").length },
-        { name: "已通过", count: this.myContents.filter((c) => c.status === "approved").length },
-        { name: "未通过", count: this.myContents.filter((c) => c.status === "rejected").length }
+        { name: "全部" },
+        { name: "待审核" },
+        { name: "已通过" },
+        { name: "未通过" }
       ];
     },
-    filtered() {
-      if (this.current === 0)
-        return this.myContents;
-      const map = { 1: "pending", 2: "approved", 3: "rejected" };
-      return this.myContents.filter((c) => c.status === map[this.current]);
+    emptyText() {
+      return ["这里还没有书帖", "暂无待审核的书帖", "暂无已通过的书帖", "暂无未通过的书帖"][this.current];
     }
   },
-  created() {
-    this._store = store_content.useContentStore();
-  },
-  onLoad(options) {
-    this._store = store_content.useContentStore();
-    this._store.init();
+  async onLoad(options) {
     this.current = Number(options.tab || 0);
+    this.list = [];
+    await this.loadList();
+  },
+  onShow() {
+    this.loadList();
   },
   methods: {
+    async switchTab(i) {
+      if (this.current === i)
+        return;
+      this.current = i;
+      this.list = [];
+      await this.loadList();
+    },
+    async loadList() {
+      if (this.loading)
+        return;
+      this.loading = true;
+      try {
+        const status = TAB_STATUS[this.current] || "";
+        const res = await common_api.postApi.mine({ page: 1, pageSize: 50, status });
+        const arr = res && res.data || (Array.isArray(res.data) ? res.data : []);
+        this.list = Array.isArray(arr) ? arr : [];
+      } catch (e) {
+        common_vendor.index.__f__("warn", "at pages/mine/records.vue:94", "[records] loadList failed", e);
+      } finally {
+        this.loading = false;
+      }
+    },
     statusText: common_format.statusText,
     statusClass: common_format.statusClass
   }
@@ -58,31 +74,30 @@ if (!Math) {
 function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
   return common_vendor.e({
     a: common_vendor.f($options.tabs, (t, i, i0) => {
-      return common_vendor.e({
-        a: common_vendor.t(t.name),
-        b: t.count
-      }, t.count ? {
-        c: common_vendor.t(t.count)
-      } : {}, {
-        d: i,
-        e: $data.current === i ? 1 : "",
-        f: common_vendor.o(($event) => $data.current = i, i)
-      });
-    }),
-    b: common_vendor.f($options.filtered, (c, k0, i0) => {
       return {
-        a: common_vendor.t($options.statusText(c.status)),
-        b: common_vendor.n($options.statusClass(c.status)),
-        c: "32349060-0-" + i0,
-        d: common_vendor.p({
-          content: c
-        }),
-        e: c.id
+        a: common_vendor.t(t.name),
+        b: i,
+        c: $data.current === i ? 1 : "",
+        d: common_vendor.o(($event) => $options.switchTab(i), i)
       };
     }),
-    c: !$options.filtered.length
-  }, !$options.filtered.length ? {
-    d: common_vendor.t($data.current === 1 ? "暂无待审核的书帖" : "这里还没有书帖")
+    b: common_vendor.f($data.list, (c, k0, i0) => {
+      return common_vendor.e({
+        a: $options.statusText(c.status)
+      }, $options.statusText(c.status) ? {
+        b: common_vendor.t($options.statusText(c.status)),
+        c: common_vendor.n($options.statusClass(c.status))
+      } : {}, {
+        d: "32349060-0-" + i0,
+        e: common_vendor.p({
+          content: c
+        }),
+        f: c.id
+      });
+    }),
+    c: !$data.loading && !$data.list.length
+  }, !$data.loading && !$data.list.length ? {
+    d: common_vendor.t($options.emptyText)
   } : {});
 }
 const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["render", _sfc_render], ["__scopeId", "data-v-32349060"]]);

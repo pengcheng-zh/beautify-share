@@ -19,7 +19,8 @@
     "minifyWXML": true,
     "localPlugins": false,
     "disableUseStrict": false,
-    "condition": false
+    "condition": false,
+    "ignoreDevUnusedFiles": false
   },
   "compileType": "miniprogram",
   "simulatorPluginLibVersion": {},
@@ -27,6 +28,6 @@
     "ignore": [],
     "include": []
   },
-  "appid": "wx0c5d11e106365ed2",
+  "appid": "wx190bc027cbef4455",
   "editorSetting": {}
 }

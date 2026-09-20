@@ -3,13 +3,11 @@
 		<!-- 顶部氛围 -->
 		<view class="banner">
 			<view class="banner-head">
-				<text class="banner-char">闲</text>
 				<view class="banner-center">
 					<view class="center-rule"></view>
-					<text class="banner-sub">人间烟火，书市清灵</text>
+					<text class="banner-sub">人间烟火，书市清灵。</text>
 					<view class="center-rule"></view>
 				</view>
-				<text class="banner-char">书</text>
 			</view>
 			<view class="banner-rule">
 				<view class="rule-line"></view>
@@ -21,6 +19,14 @@
 		<!-- 信息流 -->
 		<view v-if="list.length" class="feed">
 			<content-card v-for="c in list" :key="c.id" :content="c" />
+			<view class="feed-foot">
+				<text v-if="loading" class="foot-tip">载入中…</text>
+				<text v-else-if="finished" class="foot-tip">— 已至书市尽头 —</text>
+				<text v-else class="foot-tip foot-more" @click="loadMore">轻触加载更多</text>
+			</view>
+		</view>
+		<view v-else-if="loading" class="empty">
+			<text class="empty-text">市集开门中…</text>
 		</view>
 		<view v-else class="empty">
 			<text class="empty-char">空</text>
@@ -46,27 +52,45 @@
 		},
 		data() {
 			return {
-				list: []
+				loading: false
 			}
+		},
+		computed: {
+			contentStore() {
+				return this._store
+			},
+			list() {
+				return this._store ? this._store.feed : []
+			},
+			finished() {
+				return this._store ? !this._store.feedHasMore : true
+			}
+		},
+		created() {
+			this._store = useContentStore()
 		},
 		onLoad() {
-			this.contentStore = useContentStore()
-			this.contentStore.init()
-			this.refresh()
+			this._store = useContentStore()
+			this.loadFirst()
 		},
 		onShow() {
-			if (this.contentStore) {
-				this.contentStore.init()
-				this.refresh()
+			if (!this._store) {
+				this._store = useContentStore()
+			}
+			// 进入首页时静默刷新一次，拉取最新内容
+			this.refresh()
+		},
+		async onPullDownRefresh() {
+			try {
+				await this._store.refreshFeed()
+				uni.showToast({ title: '市集已刷新', icon: 'none' })
+			} finally {
+				uni.stopPullDownRefresh()
 			}
 		},
-		onPullDownRefresh() {
-			this.contentStore.init()
-			this.refresh()
-			setTimeout(() => {
-				uni.stopPullDownRefresh()
-				uni.showToast({ title: '市集已刷新', icon: 'none' })
-			}, 400)
+		onReachBottom() {
+			if (this.loading || this.finished) return
+			this.loadMore()
 		},
 		onShareAppMessage() {
 			return {
@@ -75,8 +99,32 @@
 			}
 		},
 		methods: {
-			refresh() {
-				this.list = this.contentStore.approvedContents
+			async loadFirst() {
+				if (this.list.length) return
+				this.loading = true
+				try {
+					await this._store.loadFeed({ page: 1, refresh: true })
+				} finally {
+					this.loading = false
+				}
+			},
+			async refresh() {
+				if (this.loading) return
+				this.loading = true
+				try {
+					await this._store.refreshFeed()
+				} finally {
+					this.loading = false
+				}
+			},
+			async loadMore() {
+				if (this.loading || this.finished) return
+				this.loading = true
+				try {
+					await this._store.loadFeed({ page: this._store.feedPage + 1 })
+				} finally {
+					this.loading = false
+				}
 			},
 			goPublish() {
 				uni.navigateTo({
@@ -158,6 +206,21 @@
 
 	.feed {
 		padding: 20rpx 24rpx 0;
+	}
+
+	.feed-foot {
+		padding: 30rpx 0 20rpx;
+		text-align: center;
+	}
+
+	.foot-tip {
+		font-size: 24rpx;
+		color: $ink-soft;
+		letter-spacing: 4rpx;
+	}
+
+	.foot-more {
+		color: $stone;
 	}
 
 	/* 空态 */

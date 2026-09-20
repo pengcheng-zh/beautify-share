@@ -33,11 +33,24 @@ function pad(n) {
 	return n < 10 ? '0' + n : '' + n
 }
 
+/**
+ * 书帖审核状态映射
+ * 后端 status 字段约定：
+ *   A = 待审核
+ *   P / B = 已通过
+ *   R / C = 未通过
+ * 兼容旧页面使用的 pending / approved / rejected 字符串。
+ */
 export function statusText(status) {
 	const map = {
 		pending: '待审核',
 		approved: '已通过',
-		rejected: '未通过'
+		rejected: '未通过',
+		A: '待审核',
+		B: '已通过',
+		P: '已通过',
+		C: '未通过',
+		R: '未通过'
 	}
 	return map[status] || status
 }
@@ -46,7 +59,12 @@ export function statusClass(status) {
 	const map = {
 		pending: 'st-pending',
 		approved: 'st-approved',
-		rejected: 'st-rejected'
+		rejected: 'st-rejected',
+		A: 'st-pending',
+		B: 'st-approved',
+		P: 'st-approved',
+		C: 'st-rejected',
+		R: 'st-rejected'
 	}
 	return map[status] || ''
 }

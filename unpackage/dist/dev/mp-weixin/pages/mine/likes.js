@@ -1,6 +1,6 @@
 "use strict";
-const store_content = require("../../store/content.js");
 const common_vendor = require("../../common/vendor.js");
+const common_api = require("../../common/api.js");
 const contentCard = () => "../../components/content-card/content-card.js";
 const _sfc_main = {
   components: {
@@ -8,16 +8,30 @@ const _sfc_main = {
   },
   data() {
     return {
-      list: []
+      list: [],
+      loading: false
     };
   },
   onShow() {
-    this._store = store_content.useContentStore();
-    this._store.init();
-    this.list = this._store.myLiked();
+    this.loadList();
   },
   onUnload() {
     this.list = [];
+  },
+  methods: {
+    async loadList() {
+      if (this.loading)
+        return;
+      this.loading = true;
+      try {
+        const res = await common_api.postApi.likeList({ page: 1, pageSize: 50 });
+        this.list = res && res.data || res.data || [];
+      } catch (e) {
+        common_vendor.index.__f__("warn", "at pages/mine/likes.vue:46", "[likes] loadList failed", e);
+      } finally {
+        this.loading = false;
+      }
+    }
   }
 };
 if (!Array) {
@@ -39,8 +53,8 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
         })
       };
     }),
-    b: !$data.list.length
-  }, !$data.list.length ? {} : {});
+    b: !$data.list.length && !$data.loading
+  }, !$data.list.length && !$data.loading ? {} : {});
 }
 const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["render", _sfc_render], ["__scopeId", "data-v-07df22d1"]]);
 wx.createPage(MiniProgramPage);

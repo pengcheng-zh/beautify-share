@@ -17,16 +17,19 @@ const _sfc_main = {
     enter() {
       this.goHome();
     },
-    goHome() {
+    async goHome() {
       if (this.entered)
         return;
       this.entered = true;
       const userStore = store_user.useUserStore();
-      if (!userStore.user)
-        userStore.login();
-      const g = userStore.user ? userStore.user.gender : "";
+      await userStore.silentLogin();
+      if (!userStore.user) {
+        this.entered = false;
+        common_vendor.index.showToast({ title: "登录失败，请点击屏幕重试", icon: "none" });
+        return;
+      }
       common_vendor.index.reLaunch({
-        url: g === "male" || g === "female" ? "/pages/tabBar/books/books" : "/pages/onboard/gender/gender"
+        url: userStore.hasGender ? "/pages/tabBar/books/books" : "/pages/onboard/gender/gender"
       });
     }
   }

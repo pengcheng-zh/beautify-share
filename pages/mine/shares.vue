@@ -29,7 +29,6 @@
 		},
 		onShow() {
 			this._store = useContentStore()
-			this._store.init()
 			this.list = this._store.myShared()
 		}
 	}

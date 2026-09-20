@@ -8,35 +8,43 @@
 
 		<!-- 分类 -->
 		<view class="tabs">
-			<view class="tab" :class="{ on: tab === 0 }" @click="tab = 0">
+			<view class="tab" :class="{ on: tab === 0 }" @click="switchTab(0)">
 				待审内容
 				<text v-if="pendingContents.length" class="tab-count">{{ pendingContents.length }}</text>
 			</view>
-			<view class="tab" :class="{ on: tab === 1 }" @click="tab = 1">
+			<view class="tab" :class="{ on: tab === 1 }" @click="switchTab(1)">
 				待审评论
 				<text v-if="pendingComments.length" class="tab-count">{{ pendingComments.length }}</text>
 			</view>
-			<view class="tab" :class="{ on: tab === 2 }" @click="tab = 2">已处理</view>
 		</view>
 
 		<!-- 待审内容 -->
 		<view v-if="tab === 0" class="list">
 			<view v-for="c in pendingContents" :key="c.id" class="item card">
 				<view class="i-head">
-					<view class="i-avatar" :style="{ background: avatarColor(c.userId) }">{{ userName(c.userId).slice(0, 1) }}</view>
+					<view class="i-avatar" :style="{ background: avatarColor(c.userId) }">{{ nick(c).slice(0, 1) }}</view>
 					<view class="i-info">
-						<text class="i-nick">{{ userName(c.userId) }}</text>
+						<text class="i-nick">{{ nick(c) }}</text>
 						<text class="i-time">{{ formatTime(c.createTime) }}</text>
 					</view>
 				</view>
-				<view v-if="c.text" class="i-text ellipsis-2">{{ c.text }}</view>
-				<view v-if="c.images && c.images.length" class="i-thumbs">
-					<image v-for="(img, k) in c.images.slice(0, 3)" :key="k" class="i-thumb" :src="img" mode="aspectFill" />
-					<text v-if="c.images.length > 3" class="i-more">+{{ c.images.length - 3 }}</text>
+				<view v-if="c.content" class="i-text ellipsis-2">{{ c.content }}</view>
+				<view v-if="c.pictures && c.pictures.length" class="i-thumbs">
+					<image v-for="(img, k) in c.pictures" :key="k" class="i-thumb" :src="img" mode="aspectFill" />
+				</view>
+				<!-- 语音：点击即可播放，再点停止 -->
+				<view v-if="c.voice" class="i-voice" @click.stop="toggleVoice(c)">
+					<view class="voice-icon">
+						<view class="bar" :class="{ 'bar-on': playingId === c.id }"></view>
+						<view class="bar" :class="{ 'bar-on': playingId === c.id }"></view>
+						<view class="bar" :class="{ 'bar-on': playingId === c.id }"></view>
+						<view class="bar" :class="{ 'bar-on': playingId === c.id }"></view>
+					</view>
+					<text class="voice-text">{{ playingId === c.id ? '播放中…' : '收听语音' }}</text>
 				</view>
 				<view class="i-meta">
-					<text v-if="c.images.length" class="meta">图 {{ c.images.length }}</text>
-					<text v-if="c.voice && c.voice.duration" class="meta">声 {{ c.voice.duration }}″</text>
+					<text v-if="c.pictures && c.pictures.length" class="meta">图 {{ c.pictures.length }}</text>
+					<text v-if="c.voice" class="meta">声</text>
 					<text v-if="c.location" class="meta loc-meta">{{ c.location.name }}</text>
 				</view>
 				<view class="i-ops">
@@ -53,11 +61,11 @@
 		<!-- 待审评论 -->
 		<view v-if="tab === 1" class="list">
 			<view v-for="cm in pendingComments" :key="cm.id" class="item card">
-				<view class="cm-title">评论「{{ contentBrief(cm.contentId) }}」</view>
+				<view class="cm-title">评论「{{ contentBrief(cm.postId) }}」</view>
 				<view class="i-head">
-					<view class="i-avatar" :style="{ background: avatarColor(cm.userId) }">{{ userName(cm.userId).slice(0, 1) }}</view>
+					<view class="i-avatar" :style="{ background: avatarColor(cm.userId) }">{{ nick(cm).slice(0, 1) }}</view>
 					<view class="i-info">
-						<text class="i-nick">{{ userName(cm.userId) }}</text>
+						<text class="i-nick">{{ nick(cm) }}</text>
 						<text class="i-time">{{ formatTime(cm.createTime) }}</text>
 					</view>
 				</view>
@@ -72,48 +80,11 @@
 				<text class="empty-text">待审评论为空</text>
 			</view>
 		</view>
-
-		<!-- 已处理 -->
-		<view v-if="tab === 2" class="list">
-			<view v-for="c in handledContents" :key="'c' + c.id" class="item card">
-				<view class="i-head">
-					<view class="i-avatar" :style="{ background: avatarColor(c.userId) }">{{ userName(c.userId).slice(0, 1) }}</view>
-					<view class="i-info">
-						<text class="i-nick">{{ userName(c.userId) }}</text>
-						<text class="i-time">{{ formatTime(c.createTime) }}</text>
-					</view>
-					<view class="h-status" :class="c.status">{{ c.status === 'approved' ? '已通过' : '已驳回' }}</view>
-				</view>
-				<view v-if="c.text" class="i-text ellipsis-2">{{ c.text }}</view>
-				<view class="i-ops">
-					<view class="op undo" @click="restoreContent(c)">撤销处理</view>
-				</view>
-			</view>
-			<view v-for="cm in handledComments" :key="'m' + cm.id" class="item card">
-				<view class="cm-title">评论「{{ contentBrief(cm.contentId) }}」</view>
-				<view class="i-head">
-					<view class="i-avatar" :style="{ background: avatarColor(cm.userId) }">{{ userName(cm.userId).slice(0, 1) }}</view>
-					<view class="i-info">
-						<text class="i-nick">{{ userName(cm.userId) }}</text>
-						<text class="i-time">{{ formatTime(cm.createTime) }}</text>
-					</view>
-					<view class="h-status" :class="cm.status">{{ cm.status === 'approved' ? '已通过' : '已驳回' }}</view>
-				</view>
-				<view class="i-text">{{ cm.text }}</view>
-				<view class="i-ops">
-					<view class="op undo" @click="restoreComment(cm)">撤销处理</view>
-				</view>
-			</view>
-			<view v-if="!handledContents.length && !handledComments.length" class="empty">
-				<text class="empty-char">虚</text>
-				<text class="empty-text">尚无处理记录</text>
-			</view>
-		</view>
 	</view>
 </template>
 
 <script>
-	import { useContentStore } from '@/store/content.js'
+	import { adminApi } from '@/common/api.js'
 	import { formatTime } from '@/common/format.js'
 
 	const AVATAR_COLORS = ['#07C160', '#576B95', '#E6A23C', '#5B8FF9', '#9254DE', '#FF7A45']
@@ -121,78 +92,168 @@
 	export default {
 		data() {
 			return {
-				tab: 0
+				tab: 0,
+				// 三个 tab 各自实时拉取，不在本地做状态过滤
+				pendingContents: [],
+				pendingComments: [],
+				// 当前正在播放的语音 id（用 data 集中管理，避免逐条记录状态）
+				playingId: null,
+				innerAudio: null
 			}
 		},
-		computed: {
-			pendingContents() {
-				return this._store ? this._store.pendingContents : []
-			},
-			pendingComments() {
-				return this._store ? this._store.pendingComments : []
-			},
-			handledContents() {
-				return this._store
-					? this._store.contents
-							.filter((c) => c.status === 'approved' || c.status === 'rejected')
-							.sort((a, b) => b.createTime - a.createTime)
-					: []
-			},
-			handledComments() {
-				return this._store
-					? this._store.comments
-							.filter((c) => c.status === 'approved' || c.status === 'rejected')
-							.sort((a, b) => b.createTime - a.createTime)
-					: []
-			}
+		onLoad(options) {
+			this.tab = Number(options.tab || 0)
+			this.loadCurrent()
 		},
-		created() {
-			this._store = useContentStore()
+		onShow() {
+			this.loadCurrent()
 		},
-		onLoad() {
-			this._store = useContentStore()
-			this._store.init()
+		onUnload() {
+			this._destroyAudio()
 		},
 		methods: {
+			// 切换 tab：实时请求当前 tab 对应的接口
+			switchTab(i) {
+				if (this.tab === i) return
+				this.tab = i
+				this.loadCurrent()
+			},
+			loadCurrent() {
+				if (this.tab === 0) {
+					this.loadPendingContents()
+				} else if (this.tab === 1) {
+					this.loadPendingComments()
+				} else {
+					this.loadHandled()
+				}
+			},
+			// 待审内容：GET /admin/post/list
+			async loadPendingContents() {
+				try {
+					const res = await adminApi.postList({ page: 1, pageSize: 50 })
+					this.pendingContents = (res && res.data) || res.data || []
+					console.log('[audit] loadPendingContents', this.pendingContents)
+				} catch (e) {
+					console.warn('[audit] loadPendingContents failed', e)
+				}
+			},
+			// 待审评论：GET /admin/comment/list
+			async loadPendingComments() {
+				try {
+					const res = await adminApi.commentList({ page: 1, pageSize: 50 })
+					this.pendingComments = (res && res.data) || res.data || []
+				} catch (e) {
+					console.warn('[audit] loadPendingComments failed', e)
+				}
+			},
+			nick(item) {
+				return item.username || '书友'
+			},
 			avatarColor(uid) {
 				let h = 0
-				for (let i = 0; i < uid.length; i++) h = (h * 31 + uid.charCodeAt(i)) % 997
+				const s = String(uid)
+				for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) % 997
 				return AVATAR_COLORS[h % AVATAR_COLORS.length]
-			},
-			userName(uid) {
-				return this._store.getUser(uid).nickname
 			},
 			formatTime(ts) {
 				return formatTime(ts)
 			},
-			contentBrief(id) {
-				const c = this._store.getContent(id)
-				if (!c) return '已删'
-				return c.text ? c.text.slice(0, 18) + (c.text.length > 18 ? '…' : '') : '无文字'
+			contentBrief(postId) {
+				const pool = this.pendingContents
+				const found = pool.find((c) => String(c.id) === String(postId))
+				if (found && found.text) {
+					return found.text.length > 10 ? found.text.slice(0, 10) + '…' : found.text
+				}
+				return '已删'
 			},
-			passContent(c) {
-				this._store.auditContent(c.id, 'approved')
-				uni.showToast({ title: '已通过，可在书斋示人', icon: 'none' })
+			/**
+			 * 语音播放/停止：单例 InnerAudioContext，playingId 记录当前正在播放的条目
+			 */
+			toggleVoice(c) {
+				if (!c || !c.voice) return
+				// 当前条目正在播：点一下停止
+				if (this.playingId === c.id) {
+					this._stopAudio()
+					return
+				}
+				// 切换到新条目前先停止旧播放
+				this._stopAudio()
+				if (!this.innerAudio) {
+					this.innerAudio = uni.createInnerAudioContext()
+					this.innerAudio.onEnded(() => { this.playingId = null })
+					this.innerAudio.onStop(() => { this.playingId = null })
+					this.innerAudio.onError((err) => {
+						console.warn('[audit] voice play error', err)
+						this.playingId = null
+					})
+				}
+				this.innerAudio.src = c.voice
+				this.innerAudio.play()
+				this.playingId = c.id
 			},
-			rejectContent(c) {
-				this._store.auditContent(c.id, 'rejected')
-				uni.showToast({ title: '已驳回', icon: 'none' })
+			_stopAudio() {
+				if (this.innerAudio) {
+					try { this.innerAudio.stop() } catch (e) {}
+				}
+				this.playingId = null
 			},
-			passComment(cm) {
-				this._store.auditComment(cm.id, 'approved')
-				uni.showToast({ title: '评论已通过', icon: 'none' })
+			_destroyAudio() {
+				if (this.innerAudio) {
+					try { this.innerAudio.destroy() } catch (e) {}
+					this.innerAudio = null
+				}
+				this.playingId = null
 			},
-			rejectComment(cm) {
-				this._store.auditComment(cm.id, 'rejected')
-				uni.showToast({ title: '评论已驳回', icon: 'none' })
+			// 书帖审核：P=通过, R=驳回，成功后刷新实时列表
+			async passContent(c) {
+				await this.auditPost(c, 'P')
 			},
-			restoreContent(c) {
-				this._store.auditContent(c.id, 'pending')
-				uni.showToast({ title: '已移回待审', icon: 'none' })
+			async rejectContent(c) {
+				const reason = await this.askReason()
+				if (reason === null) return
+				await this.auditPost(c, 'R', reason)
 			},
-			restoreComment(cm) {
-				this._store.auditComment(cm.id, 'pending')
-				uni.showToast({ title: '已移回待审', icon: 'none' })
+			async auditPost(c, status, reason) {
+				if (!c) return
+				try {
+					await adminApi.postAudit({ id: c.id, status, reason })
+					uni.showToast({ title: status === 'P' ? '已通过' : '已驳回', icon: 'success' })
+					if (this.playingId === c.id) this._stopAudio()
+					this.loadPendingContents()
+				} catch (e) {
+					uni.showToast({ title: (e && e.message) || '操作失败', icon: 'none' })
+				}
+			},
+			// 评论审核：P=通过, R=驳回，成功后刷新实时列表
+			async passComment(cm) {
+				await this.auditComment(cm, 'P')
+			},
+			async rejectComment(cm) {
+				const reason = await this.askReason()
+				if (reason === null) return
+				await this.auditComment(cm, 'R', reason)
+			},
+			async auditComment(cm, status, reason) {
+				if (!cm) return
+				try {
+					await adminApi.commentAudit({ id: cm.id, status, reason })
+					uni.showToast({ title: status === 'P' ? '已通过' : '已驳回', icon: 'success' })
+					this.loadPendingComments()
+				} catch (e) {
+					uni.showToast({ title: (e && e.message) || '操作失败', icon: 'none' })
+				}
+			},
+			// 驳回原因输入弹窗：取消返回 null，确认返回输入内容（可为空串）
+			askReason() {
+				return new Promise((resolve) => {
+					uni.showModal({
+						title: '填写驳回原因',
+						editable: true,
+						placeholderText: '驳回原因（可选）',
+						success: (res) => resolve(res.confirm ? (res.content || '') : null),
+						fail: () => resolve(null)
+					})
+				})
 			}
 		}
 	}
@@ -333,6 +394,51 @@
 		align-items: center;
 		justify-content: center;
 		font-size: 30rpx;
+		color: $ink-soft;
+	}
+
+	/* 语音条 */
+	.i-voice {
+		margin-top: 18rpx;
+		display: inline-flex;
+		align-items: center;
+		padding: 12rpx 24rpx;
+		background: $paper-deep;
+		border-radius: 999rpx;
+	}
+
+	.voice-icon {
+		display: flex;
+		align-items: flex-end;
+		height: 28rpx;
+		margin-right: 14rpx;
+	}
+
+	.voice-icon .bar {
+		width: 6rpx;
+		margin-right: 4rpx;
+		background: $ink-soft;
+		border-radius: 4rpx;
+		transition: height 0.2s ease;
+	}
+
+	.voice-icon .bar.b1 { height: 10rpx; }
+	.voice-icon .bar.b2 { height: 18rpx; }
+	.voice-icon .bar.b3 { height: 14rpx; }
+	.voice-icon .bar.b4 { height: 8rpx; }
+
+	.voice-icon .bar.bar-on { animation: barBounce 0.9s ease-in-out infinite; }
+	.voice-icon .bar.bar-on.b2 { animation-delay: 0.15s; }
+	.voice-icon .bar.bar-on.b3 { animation-delay: 0.30s; }
+	.voice-icon .bar.bar-on.b4 { animation-delay: 0.45s; }
+
+	@keyframes barBounce {
+		0%, 100% { height: 6rpx; background: $cinnabar; }
+		50% { height: 26rpx; background: $cinnabar; }
+	}
+
+	.voice-text {
+		font-size: 24rpx;
 		color: $ink-soft;
 	}
 

@@ -40,14 +40,20 @@
 			enter() {
 				this.goHome()
 			},
-			goHome() {
+			async goHome() {
 				if (this.entered) return
 				this.entered = true
 				const userStore = useUserStore()
-				if (!userStore.user) userStore.login()
-				const g = userStore.user ? userStore.user.gender : ''
+				// 等后端静默登录完成，再根据 gender 决定目的地
+				await userStore.silentLogin()
+				// 登录失败且本地无缓存：提示后留在启动页，允许用户点击重试
+				if (!userStore.user) {
+					this.entered = false
+					uni.showToast({ title: '登录失败，请点击屏幕重试', icon: 'none' })
+					return
+				}
 				uni.reLaunch({
-					url: g === 'male' || g === 'female'
+					url: userStore.hasGender
 						? '/pages/tabBar/books/books'
 						: '/pages/onboard/gender/gender'
 				})

@@ -126,6 +126,67 @@
   font-size: 30rpx;
   color: #7F7F7F;
 }
+
+/* 语音条 */
+.i-voice.data-v-490f35cd {
+  margin-top: 18rpx;
+  display: inline-flex;
+  align-items: center;
+  padding: 12rpx 24rpx;
+  background: #F5F5F5;
+  border-radius: 999rpx;
+}
+.voice-icon.data-v-490f35cd {
+  display: flex;
+  align-items: flex-end;
+  height: 28rpx;
+  margin-right: 14rpx;
+}
+.voice-icon .bar.data-v-490f35cd {
+  width: 6rpx;
+  margin-right: 4rpx;
+  background: #7F7F7F;
+  border-radius: 4rpx;
+  transition: height 0.2s ease;
+}
+.voice-icon .bar.b1.data-v-490f35cd {
+  height: 10rpx;
+}
+.voice-icon .bar.b2.data-v-490f35cd {
+  height: 18rpx;
+}
+.voice-icon .bar.b3.data-v-490f35cd {
+  height: 14rpx;
+}
+.voice-icon .bar.b4.data-v-490f35cd {
+  height: 8rpx;
+}
+.voice-icon .bar.bar-on.data-v-490f35cd {
+  animation: barBounce-490f35cd 0.9s ease-in-out infinite;
+}
+.voice-icon .bar.bar-on.b2.data-v-490f35cd {
+  animation-delay: 0.15s;
+}
+.voice-icon .bar.bar-on.b3.data-v-490f35cd {
+  animation-delay: 0.3s;
+}
+.voice-icon .bar.bar-on.b4.data-v-490f35cd {
+  animation-delay: 0.45s;
+}
+@keyframes barBounce-490f35cd {
+0%, 100% {
+    height: 6rpx;
+    background: #07C160;
+}
+50% {
+    height: 26rpx;
+    background: #07C160;
+}
+}
+.voice-text.data-v-490f35cd {
+  font-size: 24rpx;
+  color: #7F7F7F;
+}
 .i-meta.data-v-490f35cd {
   display: flex;
   margin-top: 14rpx;

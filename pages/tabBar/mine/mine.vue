@@ -9,7 +9,7 @@
 			<view class="p-info">
 				<view class="p-name-row">
 					<text class="p-name">{{ nickname }}</text>
-					<view class="p-role">{{ user.role === 'admin' ? '掌柜' : '书友' }}</view>
+					<view class="p-role">{{ isAdmin ? '掌柜' : '书友' }}</view>
 				</view>
 				<text class="p-sign">{{ user.sign || '这个人很懒，什么都没写。' }}</text>
 				<view v-if="user.location" class="p-loc">
@@ -23,19 +23,19 @@
 		<!-- 数据统计 -->
 		<view class="stats card">
 			<view class="stat" @click="goRecords">
-				<text class="stat-num">{{ myContents.length }}</text>
+				<text class="stat-num">{{ summary.postCount }}</text>
 				<text class="stat-label">发布</text>
 			</view>
 			<view class="stat" @click="goLikes">
-				<text class="stat-num">{{ myLiked.length }}</text>
+				<text class="stat-num">{{ summary.likeCount }}</text>
 				<text class="stat-label">点赞</text>
 			</view>
 			<view class="stat" @click="goFavorites">
-				<text class="stat-num">{{ myFavorited.length }}</text>
+				<text class="stat-num">{{ summary.favoriteCount }}</text>
 				<text class="stat-label">收藏</text>
 			</view>
 			<view class="stat" @click="goShares">
-				<text class="stat-num">{{ myShared.length }}</text>
+				<text class="stat-num">{{ summary.shareCount }}</text>
 				<text class="stat-label">分享</text>
 			</view>
 		</view>
@@ -57,19 +57,19 @@
 			<view class="row" @click="goLikes">
 				<view class="row-icon row-icon-like">♥</view>
 				<text class="row-text">我的点赞</text>
-				<text class="row-num">{{ myLiked.length }}</text>
+				<text class="row-num">{{ summary.likeCount }}</text>
 				<text class="row-arrow">›</text>
 			</view>
 			<view class="row" @click="goFavorites">
 				<view class="row-icon row-icon-fav">★</view>
 				<text class="row-text">我的收藏</text>
-				<text class="row-num">{{ myFavorited.length }}</text>
+				<text class="row-num">{{ summary.favoriteCount }}</text>
 				<text class="row-arrow">›</text>
 			</view>
 			<view class="row" @click="goShares">
 				<view class="row-icon row-icon-share">↗</view>
 				<text class="row-text">我的分享</text>
-				<text class="row-num">{{ myShared.length }}</text>
+				<text class="row-num">{{ summary.shareCount }}</text>
 				<text class="row-arrow">›</text>
 			</view>
 		</view>
@@ -92,72 +92,84 @@
 <script>
 	import { useContentStore } from '@/store/content.js'
 	import { useUserStore } from '@/store/user.js'
+	import { postApi } from '@/common/api.js'
 	import { greeting } from '@/common/format.js'
 
 	export default {
 		data() {
 			return {
-				greet: ''
+				greet: '',
+				// /post/mine-summary 拿到的计数，默认 0
+				summary: {
+					postCount: 0,
+					likeCount: 0,
+					favoriteCount: 0,
+					shareCount: 0
+				}
 			}
 		},
 		computed: {
+			// store 做成 computed：useUserStore()/useContentStore() 返回同一个单例，
+			// 任何时刻都不为空，且后续依赖能正常收集、自动响应更新
+			userStore() {
+				return useUserStore()
+			},
+			contentStore() {
+				return useContentStore()
+			},
 			user() {
-				return this.userStore ? this.userStore.user || {} : {}
+				return this.userStore.user || {}
 			},
 			nickname() {
-				return this.user.nickname || '书友'
+				return this.user.username || this.user.nickname || '书友'
 			},
 			avatarBg() {
 				const colors = ['#07C160', '#576B95', '#E6A23C', '#5B8FF9']
 				let h = 0
-				const id = this.user.id || 'u1'
+				const id = String(this.user.userId || this.user.id || 'u1')
 				for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) % 997
 				return colors[h % colors.length]
 			},
 			isAdmin() {
-				return this.userStore ? this.userStore.isAdmin : false
+				return this.user.roleId == 1
 			},
+			// 「待审发布」仍走 contentStore（管理端待审总数需要全量列表）
 			myContents() {
-				return this.contentStore ? this.contentStore.myContents() : []
+				return this.contentStore.myContents()
 			},
 			pendingCount() {
 				return this.myContents.filter((c) => c.status === 'pending').length
 			},
-			myLiked() {
-				return this.contentStore ? this.contentStore.myLiked() : []
-			},
-			myFavorited() {
-				return this.contentStore ? this.contentStore.myFavorited() : []
-			},
-			myShared() {
-				return this.contentStore ? this.contentStore.myShared() : []
-			},
 			auditCount() {
-				return this.contentStore
-					? this.contentStore.pendingContents.length + this.contentStore.pendingComments.length
-					: 0
+				return this.contentStore.pendingContents.length + this.contentStore.pendingComments.length
 			}
-		},
-		created() {
-			// 页面组件实例化即初始化 store，保证任何渲染时序下 computed 都有可用数据
-			this.contentStore = useContentStore()
-			this.userStore = useUserStore()
-		},
-		onLoad() {
-			this.contentStore = useContentStore()
-			this.userStore = useUserStore()
-			this.contentStore.init()
-			if (!this.userStore.user) this.userStore.login()
-		},
-		onShow() {
-			if (!this.contentStore) {
-				this.contentStore = useContentStore()
-				this.userStore = useUserStore()
-			}
-			this.contentStore.init()
-			this.greet = greeting()
-		},
+			},
+			async onLoad() {
+				// 重新请求 /auth/me，获取最新用户信息（头像/昵称/签名/性别等）
+				this.userStore.refreshMe()
+				// 拉取我的数据汇总（不再拉 post/mine 全量列表）
+				this.loadSummary()
+			},
+			onShow() {
+				this.loadSummary()
+				this.greet = greeting()
+			},
 		methods: {
+			async loadSummary() {
+				try {
+					const data = await postApi.mineSummary()
+					if (data && typeof data === 'object') {
+						this.summary = {
+							postCount: Number(data.postCount) || 0,
+							likeCount: Number(data.likeCount) || 0,
+							favoriteCount: Number(data.favoriteCount) || 0,
+							shareCount: Number(data.shareCount) || 0
+						}
+					}
+				} catch (e) {
+					console.warn('[mine] loadSummary failed', e)
+				}
+			},
 			goEditProfile() {
 				uni.navigateTo({ url: '/pages/mine/profile-edit' })
 			},

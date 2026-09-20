@@ -1,6 +1,6 @@
 {
   "name": "贤书·置换",
-  "appid": "",
+  "appid": "wx190bc027cbef4455",
   "description": "人间烟火，书市清灵。一个雅致的旧书置换与书市分享社区。",
   "versionName": "1.0.0",
   "versionCode": "100",
@@ -49,20 +49,21 @@
     }
   },
   "mp-weixin": {
-    "appid": "",
+    "appid": "wx190bc027cbef4455",
     "setting": {
-      "urlCheck": false
+      "urlCheck": false,
+      "ignoreDevUnusedFiles": false
     },
     "usingComponents": true,
     "lazyCodeLoading": "requiredComponents",
     "permission": {
       "scope.userLocation": {
         "desc": "用于在发布内容时展示书市位置"
-      },
-      "scope.record": {
-        "desc": "用于录制语音发布内容"
       }
     },
+    "requiredPrivateInfos": [
+      "chooseLocation"
+    ],
     "uniStatistics": {
       "enable": false
     }

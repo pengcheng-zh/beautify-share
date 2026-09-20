@@ -37,10 +37,6 @@
   font-weight: 600;
   box-shadow: 0 6rpx 16rpx rgba(7, 193, 96, 0.3);
 }
-.tab-count.data-v-32349060 {
-  margin-left: 6rpx;
-  font-size: 22rpx;
-}
 .list.data-v-32349060 {
   padding: 20rpx 24rpx;
 }

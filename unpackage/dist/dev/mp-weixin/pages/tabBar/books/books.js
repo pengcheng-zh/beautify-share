@@ -8,27 +8,45 @@ const _sfc_main = {
   },
   data() {
     return {
-      list: []
+      loading: false
     };
   },
-  onLoad() {
-    this.contentStore = store_content.useContentStore();
-    this.contentStore.init();
-    this.refresh();
-  },
-  onShow() {
-    if (this.contentStore) {
-      this.contentStore.init();
-      this.refresh();
+  computed: {
+    contentStore() {
+      return this._store;
+    },
+    list() {
+      return this._store ? this._store.feed : [];
+    },
+    finished() {
+      return this._store ? !this._store.feedHasMore : true;
     }
   },
-  onPullDownRefresh() {
-    this.contentStore.init();
+  created() {
+    this._store = store_content.useContentStore();
+  },
+  onLoad() {
+    this._store = store_content.useContentStore();
+    this.loadFirst();
+  },
+  onShow() {
+    if (!this._store) {
+      this._store = store_content.useContentStore();
+    }
     this.refresh();
-    setTimeout(() => {
-      common_vendor.index.stopPullDownRefresh();
+  },
+  async onPullDownRefresh() {
+    try {
+      await this._store.refreshFeed();
       common_vendor.index.showToast({ title: "市集已刷新", icon: "none" });
-    }, 400);
+    } finally {
+      common_vendor.index.stopPullDownRefresh();
+    }
+  },
+  onReachBottom() {
+    if (this.loading || this.finished)
+      return;
+    this.loadMore();
   },
   onShareAppMessage() {
     return {
@@ -37,8 +55,35 @@ const _sfc_main = {
     };
   },
   methods: {
-    refresh() {
-      this.list = this.contentStore.approvedContents;
+    async loadFirst() {
+      if (this.list.length)
+        return;
+      this.loading = true;
+      try {
+        await this._store.loadFeed({ page: 1, refresh: true });
+      } finally {
+        this.loading = false;
+      }
+    },
+    async refresh() {
+      if (this.loading)
+        return;
+      this.loading = true;
+      try {
+        await this._store.refreshFeed();
+      } finally {
+        this.loading = false;
+      }
+    },
+    async loadMore() {
+      if (this.loading || this.finished)
+        return;
+      this.loading = true;
+      try {
+        await this._store.loadFeed({ page: this._store.feedPage + 1 });
+      } finally {
+        this.loading = false;
+      }
     },
     goPublish() {
       common_vendor.index.navigateTo({
@@ -57,9 +102,9 @@ if (!Math) {
 }
 function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
   return common_vendor.e({
-    a: $data.list.length
-  }, $data.list.length ? {
-    b: common_vendor.f($data.list, (c, k0, i0) => {
+    a: $options.list.length
+  }, $options.list.length ? common_vendor.e({
+    b: common_vendor.f($options.list, (c, k0, i0) => {
       return {
         a: c.id,
         b: "9d4f95ad-0-" + i0,
@@ -67,9 +112,15 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
           content: c
         })
       };
-    })
-  } : {}, {
-    c: common_vendor.o((...args) => $options.goPublish && $options.goPublish(...args), "35")
+    }),
+    c: $data.loading
+  }, $data.loading ? {} : $options.finished ? {} : {
+    e: common_vendor.o((...args) => $options.loadMore && $options.loadMore(...args), "9f")
+  }, {
+    d: $options.finished
+  }) : $data.loading ? {} : {}, {
+    f: $data.loading,
+    g: common_vendor.o((...args) => $options.goPublish && $options.goPublish(...args), "30")
   });
 }
 const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["render", _sfc_render], ["__scopeId", "data-v-9d4f95ad"]]);

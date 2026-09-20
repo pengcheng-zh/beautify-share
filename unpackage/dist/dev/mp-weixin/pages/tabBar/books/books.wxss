@@ -73,6 +73,18 @@
 .feed.data-v-9d4f95ad {
   padding: 20rpx 24rpx 0;
 }
+.feed-foot.data-v-9d4f95ad {
+  padding: 30rpx 0 20rpx;
+  text-align: center;
+}
+.foot-tip.data-v-9d4f95ad {
+  font-size: 24rpx;
+  color: #7F7F7F;
+  letter-spacing: 4rpx;
+}
+.foot-more.data-v-9d4f95ad {
+  color: #05A652;
+}
 
 /* 空态 */
 .empty.data-v-9d4f95ad {

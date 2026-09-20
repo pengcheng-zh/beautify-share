@@ -4,11 +4,11 @@
 		<view class="sub">用于个性化推荐，可稍后在资料中修改</view>
 
 		<view class="options">
-			<view class="option" :class="{ active: picked === 'male' }" @click="pick('male')">
+			<view class="option" :class="{ active: picked === genderEnum.MALE }" @click="pick(genderEnum.MALE)">
 				<image class="opt-img" src="/static/male.png" mode="aspectFit" />
 				<text class="opt-label">男</text>
 			</view>
-			<view class="option" :class="{ active: picked === 'female' }" @click="pick('female')">
+			<view class="option" :class="{ active: picked === genderEnum.FEMALE }" @click="pick(genderEnum.FEMALE)">
 				<image class="opt-img" src="/static/female.png" mode="aspectFit" />
 				<text class="opt-label">女</text>
 			</view>
@@ -19,32 +19,48 @@
 </template>
 
 <script>
-	import { useUserStore } from '@/store/user.js'
+	import { useUserStore, GENDER } from '@/store/user.js'
+	import { authApi } from '@/common/api.js'
 
 	export default {
 		data() {
 			return {
-				picked: ''
+				picked: GENDER.UNKNOWN,
+				genderEnum: GENDER
 			}
 		},
 		onLoad() {
 			this.userStore = useUserStore()
-			if (!this.userStore.user) this.userStore.login()
-			if (this.userStore.user && this.userStore.user.gender) {
-				uni.reLaunch({ url: '/pages/tabBar/books/books' })
-			}
+			// 重新拉一次用户信息，避免后端已设置 gender 但本地缓存仍为空
+			this.userStore.silentLogin().then(() => {
+				if (this.userStore.hasGender) {
+					uni.reLaunch({ url: '/pages/tabBar/books/books' })
+				}
+			})
 		},
 		methods: {
 			pick(g) {
 				this.picked = g
 			},
-			confirm() {
+			async confirm() {
 				if (!this.picked) {
 					uni.showToast({ title: '请先选择性别', icon: 'none' })
 					return
 				}
-				this.userStore.updateUser({ gender: this.picked })
-				uni.reLaunch({ url: '/pages/tabBar/books/books' })
+				// 先落库再跳转：接口成功后更新本地缓存
+				uni.showLoading({ title: '保存中', mask: true })
+				try {
+					await authApi.updateGender(this.picked)
+					this.userStore.updateUser({ gender: this.picked })
+					uni.hideLoading()
+					uni.reLaunch({ url: '/pages/tabBar/books/books' })
+				} catch (e) {
+					uni.hideLoading()
+					uni.showToast({
+						title: (e && e.message) || '保存失败，请重试',
+						icon: 'none'
+					})
+				}
 			}
 		}
 	}

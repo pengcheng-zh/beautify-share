@@ -3,7 +3,7 @@
 		<!-- 头部 -->
 		<view class="head">
 			<view class="avatar" :style="{ background: avatarBg }">
-				<image v-if="user.avatar" class="avatar-img" :src="user.avatar" mode="aspectFill" />
+				<image v-if="content.avatar" class="avatar-img" :src="content.avatar" mode="aspectFill" />
 				<text v-else class="avatar-text">{{ nickname.slice(0, 1) }}</text>
 			</view>
 			<view class="head-info">
@@ -11,25 +11,28 @@
 					<text class="nick">{{ nickname }}</text>
 					<text v-if="isMine" class="tag-mine">我</text>
 				</view>
-				<text class="time">{{ timeText }}<text v-if="content.location" class="loc">{{ content.location.name }}</text></text>
+				<text class="time">
+					{{ timeText }}
+					<text v-if="locationName" class="loc">{{ locationName }}</text>
+				</text>
 			</view>
 		</view>
 
 		<!-- 正文 -->
-		<view v-if="content.text" class="body-text" :class="{ 'with-more': !expanded && content.text.length > 90 }">
-			<text>{{ content.text }}</text>
-			<text v-if="!expanded && content.text.length > 90" class="more" @click.stop="expanded = true">全文</text>
+		<view v-if="text" class="body-text" :class="{ 'with-more': !expanded && text.length > 90 }">
+			<text>{{ text }}</text>
+			<text v-if="!expanded && text.length > 90" class="more" @click.stop="expanded = true">全文</text>
 		</view>
 
 		<!-- 九宫格图片 -->
-		<view v-if="content.images && content.images.length" class="grid" :class="'grid-n' + content.images.length">
+		<view v-if="images.length" class="grid" :class="'grid-n' + images.length">
 			<view
-				v-for="(img, i) in content.images"
+				v-for="(img, i) in images"
 				:key="i"
 				class="grid-item"
 				:class="{
-					'grid-single': content.images.length === 1,
-					'grid-half': content.images.length === 2
+					'grid-single': images.length === 1,
+					'grid-half': images.length === 2
 				}"
 				@click.stop="preview(i)"
 			>
@@ -38,34 +41,20 @@
 		</view>
 
 		<!-- 语音 -->
-		<view v-if="content.voice && content.voice.duration" class="voice" @click.stop="toggleVoice">
+		<view v-if="voiceUrl" class="voice" @click.stop="toggleVoice">
 			<view class="voice-icon">
 				<view class="bar" :class="[playing ? 'bar-on' : '', 'b1']"></view>
 				<view class="bar" :class="[playing ? 'bar-on' : '', 'b2']"></view>
 				<view class="bar" :class="[playing ? 'bar-on' : '', 'b3']"></view>
 				<view class="bar" :class="[playing ? 'bar-on' : '', 'b4']"></view>
 			</view>
-			<text class="voice-text">{{ playing ? '播放中…' : '语音 · ' + content.voice.duration + '″' }}</text>
+			<text class="voice-text">{{ playing ? '播放中…' : '语音消息' }}</text>
 		</view>
 
 		<!-- 定位 -->
-		<view v-if="content.location" class="location" @click.stop="showMap">
+		<view v-if="locationName" class="location" @click.stop="showMap">
 			<view class="pin"></view>
-			<text class="loc-name">{{ content.location.name }}</text>
-			<text v-if="content.location.address" class="loc-addr">{{ content.location.address }}</text>
-		</view>
-
-		<!-- 点赞名单 -->
-		<view v-if="content.likes && content.likes.length" class="likers">
-			<view class="likers-avatars">
-				<view
-					v-for="uid in content.likes.slice(0, 8)"
-					:key="uid"
-					class="liker-avatar"
-					:style="{ background: avatarColor(uid) }"
-				>{{ likerName(uid).slice(0, 1) }}</view>
-			</view>
-			<text class="likers-count">{{ content.likes.length }}</text>
+			<text class="loc-name">{{ locationName }}</text>
 		</view>
 
 		<!-- 操作条 -->
@@ -73,12 +62,12 @@
 			<view class="action" :class="{ on: liked }" @click.stop="like">
 				<text class="a-icon">{{ liked ? '♥' : '♡' }}</text>
 				<text class="a-text">{{ liked ? '已赞' : '点赞' }}</text>
-				<text v-if="content.likes.length" class="a-num">{{ content.likes.length }}</text>
+				<text v-if="likeCount" class="a-num">{{ likeCount }}</text>
 			</view>
-			<view class="action" @click.stop="comment">
+			<view class="action" @click.stop="goDetail">
 				<text class="a-icon">⌾</text>
 				<text class="a-text">评论</text>
-				<text v-if="approvedComments.length" class="a-num">{{ approvedComments.length }}</text>
+				<text v-if="commentCount" class="a-num">{{ commentCount }}</text>
 			</view>
 			<view class="action" :class="{ on: favorited }" @click.stop="favorite">
 				<text class="a-icon">{{ favorited ? '★' : '☆' }}</text>
@@ -90,31 +79,17 @@
 			</view>
 		</view>
 
-		<!-- 评论区 -->
-		<view v-if="approvedComments.length" class="comments">
-			<view v-for="cm in showComments" :key="cm.id" class="cm-item" @click.stop="goDetail">
-				<text class="cm-nick">{{ cmName(cm.userId) }}：</text>
-				<text class="cm-text">{{ cm.text }}</text>
-			</view>
-			<view v-if="approvedComments.length > 3 && !inDetail" class="cm-more" @click.stop="goDetail">
-				查看全部 {{ approvedComments.length }} 条评论
-			</view>
+		<!-- 评论区入口 -->
+		<view v-if="commentCount" class="comments" @click.stop="goDetail">
+			<text class="cm-tip">查看 {{ commentCount }} 条评论 ›</text>
 		</view>
 	</view>
 </template>
 
 <script>
-	import { useContentStore } from '@/store/content.js'
+	import { postApi } from '@/common/api.js'
 	import { useUserStore } from '@/store/user.js'
 	import { formatTime } from '@/common/format.js'
-
-	const AVATAR_COLORS = ['#07C160', '#576B95', '#E6A23C', '#5B8FF9', '#9254DE', '#FF7A45']
-
-	function hashId(id) {
-		let h = 0
-		for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) % 997
-		return h
-	}
 
 	export default {
 		name: 'content-card',
@@ -136,44 +111,55 @@
 			}
 		},
 		computed: {
-			user() {
-				return this.contentStore.getUser(this.content.userId)
-			},
+			/* 用户信息直接来自 content，无需查 store */
 			nickname() {
-				return this.user.nickname
+				return this.content.username || '无名书友'
 			},
 			avatarBg() {
-				return AVATAR_COLORS[hashId(this.content.userId) % AVATAR_COLORS.length]
+				if (this.content.avatar) return 'transparent'
+				const key = String(this.content.userId || '')
+				const colors = ['#07C160', '#576B95', '#E6A23C', '#5B8FF9', '#9254DE', '#FF7A45']
+				let h = 0
+				for (let i = 0; i < key.length; i++) h = (h * 31 + key.charCodeAt(i)) % 997
+				return colors[h % colors.length]
 			},
 			timeText() {
 				return formatTime(this.content.createTime)
 			},
 			isMine() {
-				return this.userStore.user && this.content.userId === this.userStore.user.id
+				if (!this.userStore.user) return false
+				const me = this.userStore.user.userId || this.userStore.user.id
+				return String(this.content.userId) === String(me)
 			},
-			liked() {
-				return this.me && this.content.likes.indexOf(this.me.id) > -1
+
+			/* 正文 */
+			text() {
+				return this.content.content || ''
 			},
-			favorited() {
-				return this.me && this.content.favs.indexOf(this.me.id) > -1
+
+			/* 图片：后端字段 pictures */
+			images() {
+				return Array.isArray(this.content.pictures) ? this.content.pictures : []
 			},
-			me() {
-				return this.userStore.user
+
+			/* 语音：后端只返回 URL 字符串，无 duration/path */
+			voiceUrl() {
+				return this.content.voice || ''
 			},
-			allComments() {
-				return this.contentStore
-					.getCommentsOf(this.content.id)
-					.filter((c) => c.status === 'approved')
+
+			/* 定位：后端 location 是名称字符串，latitude/longitude 独立 */
+			locationName() {
+				return this.content.location || ''
 			},
-			approvedComments() {
-				return this.allComments
-			},
-			showComments() {
-				return this.inDetail ? this.allComments : this.allComments.slice(0, 3)
-			}
+
+			/* 互动计数 */
+			liked() { return !!this.content.liked },
+			favorited() { return !!this.content.favorited },
+			likeCount() { return Number(this.content.likeCount) || 0 },
+			favoriteCount() { return Number(this.content.favoriteCount) || 0 },
+			commentCount() { return Number(this.content.commentCount) || 0 }
 		},
 		created() {
-			this.contentStore = useContentStore()
 			this.userStore = useUserStore()
 		},
 		beforeUnmount() {
@@ -183,15 +169,6 @@
 			}
 		},
 		methods: {
-			avatarColor(uid) {
-				return AVATAR_COLORS[hashId(uid) % AVATAR_COLORS.length]
-			},
-			likerName(uid) {
-				return this.contentStore.getUser(uid).nickname
-			},
-			cmName(uid) {
-				return this.contentStore.getUser(uid).nickname
-			},
 			goDetail() {
 				if (this.inDetail) return
 				uni.navigateTo({
@@ -201,22 +178,47 @@
 			preview(index) {
 				uni.previewImage({
 					current: index,
-					urls: this.content.images
+					urls: this.images
 				})
 			},
-			like() {
-				this.contentStore.toggleLike(this.content.id)
-			},
-			favorite() {
-				this.contentStore.toggleFav(this.content.id)
-			},
-			comment() {
-				this.goDetail()
-			},
-			share() {
-				this.contentStore.recordShare(this.content.id)
+
+			/**
+			 * 点赞：直接调接口，乐观更新传入的 content 对象
+			 */
+			async like() {
 				const c = this.content
-				const text = '「' + (c.text ? c.text.slice(0, 30) : '贤书·置换') + '」 来自 贤书·置换'
+				const wasLiked = !!c.liked
+				c.liked = !wasLiked
+				c.likeCount = Math.max(0, (Number(c.likeCount) || 0) + (wasLiked ? -1 : 1))
+				try {
+					await postApi.like(c.id)
+				} catch (e) {
+					c.liked = wasLiked
+					c.likeCount = Math.max(0, (Number(c.likeCount) || 0) + (wasLiked ? 1 : -1))
+					uni.showToast({ title: '点赞失败，请稍后再试', icon: 'none' })
+				}
+			},
+
+			/**
+			 * 收藏：直接调接口，乐观更新传入的 content 对象
+			 */
+			async favorite() {
+				const c = this.content
+				const wasFav = !!c.favorited
+				c.favorited = !wasFav
+				c.favoriteCount = Math.max(0, (Number(c.favoriteCount) || 0) + (wasFav ? -1 : 1))
+				try {
+					await postApi.favorite(c.id)
+				} catch (e) {
+					c.favorited = wasFav
+					c.favoriteCount = Math.max(0, (Number(c.favoriteCount) || 0) + (wasFav ? 1 : -1))
+					uni.showToast({ title: '收藏失败，请稍后再试', icon: 'none' })
+				}
+			},
+
+			share() {
+				const c = this.content
+				const text = '「' + (this.text ? this.text.slice(0, 30) : '贤书·置换') + '」 来自 贤书·置换'
 				uni.showActionSheet({
 					itemList: ['复制内容分享', '转发给书友'],
 					success: (res) => {
@@ -233,35 +235,30 @@
 					}
 				})
 			},
+
 			toggleVoice() {
-				const v = this.content.voice
-				if (!v || !v.duration) return
-				if (!v.path) {
-					uni.showToast({ title: '演示数据暂无音频', icon: 'none' })
-					return
-				}
+				if (!this.voiceUrl) return
 				if (!this.innerAudio) {
 					this.innerAudio = uni.createInnerAudioContext()
-					this.innerAudio.onEnded(() => {
-						this.playing = false
-					})
+					this.innerAudio.onEnded(() => { this.playing = false })
 				}
 				if (this.playing) {
 					this.innerAudio.stop()
 					this.playing = false
 					return
 				}
-				this.innerAudio.src = v.path
+				this.innerAudio.src = this.voiceUrl
 				this.innerAudio.play()
 				this.playing = true
 			},
+
 			showMap() {
-				if (!this.content.location) return
+				if (!this.locationName) return
 				uni.openLocation({
-					latitude: this.content.location.lat || 30.27,
-					longitude: this.content.location.lng || 120.15,
-					name: this.content.location.name,
-					address: this.content.location.address || ''
+					latitude: Number(this.content.latitude) || 30.27,
+					longitude: Number(this.content.longitude) || 120.15,
+					name: this.locationName,
+					address: ''
 				})
 			}
 		}
@@ -279,7 +276,6 @@
 		display: flex;
 		align-items: center;
 	}
-
 	.avatar {
 		width: 88rpx;
 		height: 88rpx;
@@ -291,35 +287,29 @@
 		overflow: hidden;
 		box-shadow: inset 0 -6rpx 12rpx rgba(0, 0, 0, 0.12);
 	}
-
 	.avatar-img {
 		width: 100%;
 		height: 100%;
 	}
-
 	.avatar-text {
 		color: #FFFFFF;
 		font-size: 40rpx;
 		font-weight: 600;
 	}
-
 	.head-info {
 		margin-left: 22rpx;
 		flex: 1;
 		min-width: 0;
 	}
-
 	.name-row {
 		display: flex;
 		align-items: center;
 	}
-
 	.nick {
 		font-size: 32rpx;
 		font-weight: 600;
 		color: $ink;
 	}
-
 	.tag-mine {
 		margin-left: 12rpx;
 		font-size: 20rpx;
@@ -328,14 +318,12 @@
 		padding: 2rpx 12rpx;
 		border-radius: 6rpx;
 	}
-
 	.time {
 		display: block;
 		margin-top: 6rpx;
 		font-size: 24rpx;
 		color: $ink-soft;
 	}
-
 	.loc {
 		margin-left: 16rpx;
 		color: $stone;
@@ -350,7 +338,6 @@
 		word-break: break-all;
 		white-space: pre-wrap;
 	}
-
 	.more {
 		color: $cinnabar;
 		margin-left: 10rpx;
@@ -362,7 +349,6 @@
 		flex-wrap: wrap;
 		margin-top: 20rpx;
 	}
-
 	.grid-item {
 		width: calc((100% - 16rpx) / 3);
 		height: 216rpx;
@@ -372,30 +358,21 @@
 		overflow: hidden;
 		background: $paper-deep;
 	}
-
-	.grid-item:nth-child(3n) {
-		margin-right: 0;
-	}
-
+	.grid-item:nth-child(3n) { margin-right: 0; }
 	.grid-img {
 		width: 100%;
 		height: 100%;
 	}
-
 	.grid-single {
 		width: 460rpx;
 		height: 460rpx;
 		margin-right: 0;
 	}
-
 	.grid-half {
 		width: calc((100% - 8rpx) / 2);
 		height: 300rpx;
 	}
-
-	.grid-half:nth-child(2n) {
-		margin-right: 0;
-	}
+	.grid-half:nth-child(2n) { margin-right: 0; }
 
 	/* 语音条 */
 	.voice {
@@ -406,14 +383,12 @@
 		background: $paper-deep;
 		border-radius: 999rpx;
 	}
-
 	.voice-icon {
 		display: flex;
 		align-items: flex-end;
 		height: 36rpx;
 		margin-right: 18rpx;
 	}
-
 	.bar {
 		width: 6rpx;
 		margin-right: 6rpx;
@@ -421,26 +396,21 @@
 		border-radius: 4rpx;
 		height: 12rpx;
 	}
-
 	.b1 { height: 16rpx; }
 	.b2 { height: 30rpx; }
 	.b3 { height: 22rpx; }
 	.b4 { height: 12rpx; }
-
 	.bar-on {
 		background: $cinnabar;
 		animation: wave 0.8s ease-in-out infinite;
 	}
-
 	.bar-on.b2 { animation-delay: 0.1s; }
 	.bar-on.b3 { animation-delay: 0.2s; }
 	.bar-on.b4 { animation-delay: 0.3s; }
-
 	@keyframes wave {
 		0%, 100% { transform: scaleY(0.6); }
 		50% { transform: scaleY(1.4); }
 	}
-
 	.voice-text {
 		font-size: 26rpx;
 		color: $ink;
@@ -453,7 +423,6 @@
 		align-items: center;
 		align-self: flex-start;
 	}
-
 	.pin {
 		width: 20rpx;
 		height: 20rpx;
@@ -464,50 +433,9 @@
 		margin-bottom: 4rpx;
 		flex-shrink: 0;
 	}
-
 	.loc-name {
 		font-size: 26rpx;
 		color: $stone;
-	}
-
-	.loc-addr {
-		margin-left: 16rpx;
-		font-size: 24rpx;
-		color: $ink-soft;
-	}
-
-	/* 点赞名单 */
-	.likers {
-		margin-top: 20rpx;
-		display: flex;
-		align-items: center;
-		background: $paper-deep;
-		border-radius: 10rpx;
-		padding: 14rpx 18rpx;
-	}
-
-	.likers-avatars {
-		display: flex;
-		flex: 1;
-	}
-
-	.liker-avatar {
-		width: 44rpx;
-		height: 44rpx;
-		border-radius: 50%;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		color: #FFFFFF;
-		font-size: 22rpx;
-		margin-right: -10rpx;
-		border: 3rpx solid $paper;
-	}
-
-	.likers-count {
-		font-size: 24rpx;
-		color: $ink-soft;
-		margin-left: 18rpx;
 	}
 
 	/* 操作条 */
@@ -518,7 +446,6 @@
 		padding-top: 18rpx;
 		border-top: 1rpx solid $uni-border-color;
 	}
-
 	.action {
 		flex: 1;
 		display: flex;
@@ -527,17 +454,12 @@
 		color: $ink-soft;
 		font-size: 26rpx;
 	}
-
-	.action.on {
-		color: $cinnabar;
-	}
-
+	.action.on { color: $cinnabar; }
 	.a-icon {
 		font-size: 34rpx;
 		margin-right: 8rpx;
 		line-height: 1;
 	}
-
 	.a-num {
 		margin-left: 8rpx;
 		font-size: 24rpx;
@@ -551,21 +473,9 @@
 		border-radius: 10rpx;
 		padding: 14rpx 18rpx;
 	}
-
-	.cm-item {
+	.cm-tip {
 		font-size: 26rpx;
-		line-height: 1.8;
-		color: #191919;
-	}
-
-	.cm-nick {
-		color: $stone;
-		font-weight: 600;
-	}
-
-	.cm-more {
-		margin-top: 8rpx;
-		font-size: 24rpx;
 		color: $ink-soft;
+		letter-spacing: 2rpx;
 	}
 </style>

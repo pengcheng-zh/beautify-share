@@ -1,10 +1,38 @@
 <script>
+	import { useUserStore } from '@/store/user.js'
+
+	function runSilentLogin(reason) {
+		try {
+			const userStore = useUserStore()
+			// 已存在用户信息（来自本地缓存或上一次静默登录）则跳过，
+			// 避免每次回到前台都重复请求 /auth/login
+			if (userStore && userStore.user) {
+				console.log('[silentLogin] skip, user exists:', userStore.user.id)
+				return
+			}
+			console.log('[silentLogin] trigger by', reason)
+			const p = userStore.silentLogin()
+			if (p && typeof p.then === 'function') {
+				p.then((u) => {
+					console.log('[silentLogin] done', u && u.id)
+				}).catch((err) => {
+					console.warn('[silentLogin] failed', err)
+				})
+			}
+		} catch (err) {
+			console.error('[silentLogin] sync error', err)
+		}
+	}
+
 	export default {
 		onLaunch: function() {
 			console.log('贤书·置换 App Launch')
+			runSilentLogin('onLaunch')
 		},
 		onShow: function() {
 			console.log('贤书·置换 App Show')
+			// 从后台切回前台也补一次，确保用户信息最新
+			runSilentLogin('onShow')
 		},
 		onHide: function() {
 			console.log('App Hide')

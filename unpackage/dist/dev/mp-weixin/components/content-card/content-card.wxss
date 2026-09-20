@@ -202,42 +202,6 @@
   font-size: 26rpx;
   color: #05A652;
 }
-.loc-addr.data-v-2ce30bd0 {
-  margin-left: 16rpx;
-  font-size: 24rpx;
-  color: #7F7F7F;
-}
-
-/* 点赞名单 */
-.likers.data-v-2ce30bd0 {
-  margin-top: 20rpx;
-  display: flex;
-  align-items: center;
-  background: #F5F5F5;
-  border-radius: 10rpx;
-  padding: 14rpx 18rpx;
-}
-.likers-avatars.data-v-2ce30bd0 {
-  display: flex;
-  flex: 1;
-}
-.liker-avatar.data-v-2ce30bd0 {
-  width: 44rpx;
-  height: 44rpx;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #FFFFFF;
-  font-size: 22rpx;
-  margin-right: -10rpx;
-  border: 3rpx solid #FFFFFF;
-}
-.likers-count.data-v-2ce30bd0 {
-  font-size: 24rpx;
-  color: #7F7F7F;
-  margin-left: 18rpx;
-}
 
 /* 操作条 */
 .actions.data-v-2ce30bd0 {
@@ -276,17 +240,8 @@
   border-radius: 10rpx;
   padding: 14rpx 18rpx;
 }
-.cm-item.data-v-2ce30bd0 {
+.cm-tip.data-v-2ce30bd0 {
   font-size: 26rpx;
-  line-height: 1.8;
-  color: #191919;
-}
-.cm-nick.data-v-2ce30bd0 {
-  color: #05A652;
-  font-weight: 600;
-}
-.cm-more.data-v-2ce30bd0 {
-  margin-top: 8rpx;
-  font-size: 24rpx;
   color: #7F7F7F;
+  letter-spacing: 2rpx;
 }

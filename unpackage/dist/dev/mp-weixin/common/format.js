@@ -29,7 +29,12 @@ function statusText(status) {
   const map = {
     pending: "待审核",
     approved: "已通过",
-    rejected: "未通过"
+    rejected: "未通过",
+    A: "待审核",
+    B: "已通过",
+    P: "已通过",
+    C: "未通过",
+    R: "未通过"
   };
   return map[status] || status;
 }
@@ -37,7 +42,12 @@ function statusClass(status) {
   const map = {
     pending: "st-pending",
     approved: "st-approved",
-    rejected: "st-rejected"
+    rejected: "st-rejected",
+    A: "st-pending",
+    B: "st-approved",
+    P: "st-approved",
+    C: "st-rejected",
+    R: "st-rejected"
   };
   return map[status] || "";
 }

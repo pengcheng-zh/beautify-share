@@ -74,6 +74,7 @@
 
 <script>
 	import { useContentStore } from '@/store/content.js'
+	import { uploadApi, postApi } from '@/common/api.js'
 
 	export default {
 		data() {
@@ -82,6 +83,7 @@
 				images: [],
 				voice: { path: '', duration: 0 },
 				location: null,
+				submitting: false,
 				recording: false,
 				recordSeconds: 0,
 				recordTimer: null,
@@ -245,16 +247,52 @@
 					uni.showToast({ title: '写点什么吧', icon: 'none' })
 					return
 				}
-				this.contentStore.publish({
-					text: this.text.trim(),
-					images: this.images,
-					voice: this.voice,
-					location: this.location
-				})
-				uni.showToast({ title: '已呈上，待掌柜审核', icon: 'none' })
-				setTimeout(() => {
-					uni.navigateBack()
-				}, 1200)
+				if (this.submitting) return
+				this.submitting = true
+				this.doSubmit()
+			},
+			async doSubmit() {
+				uni.showLoading({ title: '呈递中', mask: true })
+				try {
+					// 1. 上传图片，收集后端 URL
+					const pictures = []
+					for (const img of this.images) {
+						const url = await uploadApi.uploadFile(img)
+						pictures.push(url)
+					}
+					// 2. 上传语音（最多一条：地址与时长成对携带）
+
+					console.log('this.voice', this.voice)
+					let voiceUrl = ''
+					let voiceDuration = 0
+					if (this.voice.path && this.voice.duration) {
+						voiceUrl = await uploadApi.uploadFile(this.voice.path)
+						voiceDuration = this.voice.duration
+					}
+					// 3. 创建书帖
+					const payload = {
+						content: this.text.trim(),
+						pictures,
+						location: this.location ? (this.location.name || '') : '',
+						latitude: this.location ? String(this.location.lat || '') : '',
+						longitude: this.location ? String(this.location.lng || '') : '',
+						voice: voiceUrl,
+						duration: voiceDuration
+					}
+					await postApi.create(payload)
+					uni.hideLoading()
+					uni.showToast({ title: '已呈上，待掌柜审核', icon: 'none' })
+					setTimeout(() => {
+						uni.navigateBack()
+					}, 1200)
+				} catch (e) {
+					this.submitting = false
+					uni.hideLoading()
+					uni.showToast({
+						title: (e && e.message) || '呈递失败，请重试',
+						icon: 'none'
+					})
+				}
 			}
 		}
 	}

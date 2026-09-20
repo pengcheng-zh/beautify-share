@@ -1,37 +1,45 @@
 <template>
 	<view class="page">
-		<!-- 状态筛选 -->
+		<!-- 状态筛选：每个 tab 都由后端按 status 返回，不再本地过滤 -->
 		<view class="tabs">
 			<view
 				v-for="(t, i) in tabs"
 				:key="i"
 				class="tab"
 				:class="{ on: current === i }"
-				@click="current = i"
+				@click="switchTab(i)"
 			>
 				{{ t.name }}
-				<text v-if="t.count" class="tab-count">{{ t.count }}</text>
 			</view>
 		</view>
 
 		<view class="list">
-			<view v-for="c in filtered" :key="c.id" class="wrap">
-				<view class="status-tag" :class="statusClass(c.status)">{{ statusText(c.status) }}</view>
+			<view v-for="c in list" :key="c.id" class="wrap">
+				<view v-if="statusText(c.status)" class="status-tag" :class="statusClass(c.status)">{{ statusText(c.status) }}</view>
 				<content-card :content="c" />
 			</view>
 
-			<view v-if="!filtered.length" class="empty">
+			<view v-if="!loading && !list.length" class="empty">
 				<text class="empty-char">空</text>
-				<text class="empty-text">{{ current === 1 ? '暂无待审核的书帖' : '这里还没有书帖' }}</text>
+				<text class="empty-text">{{ emptyText }}</text>
 			</view>
 		</view>
 	</view>
 </template>
 
 <script>
-	import { useContentStore } from '@/store/content.js'
+	import { postApi } from '@/common/api.js'
 	import { statusText, statusClass } from '@/common/format.js'
 	import contentCard from '@/components/content-card/content-card.vue'
+
+	/**
+	 * tab 索引 -> 后端 status 编码
+	 *   0 全部  -> 不传 status
+	 *   1 待审核 -> A
+	 *   2 已通过 -> B（兼容 P）
+	 *   3 未通过 -> C（兼容 R）
+	 */
+	const TAB_STATUS = ['', 'A', 'P', 'R']
 
 	export default {
 		components: {
@@ -39,39 +47,55 @@
 		},
 		data() {
 			return {
-				current: 0
+				current: 0,
+				list: [],
+				loading: false
 			}
 		},
 		computed: {
-			contentStore() {
-				return this._store
-			},
-			myContents() {
-				return this._store ? this._store.myContents() : []
-			},
 			tabs() {
 				return [
-					{ name: '全部', count: this.myContents.length },
-					{ name: '待审核', count: this.myContents.filter((c) => c.status === 'pending').length },
-					{ name: '已通过', count: this.myContents.filter((c) => c.status === 'approved').length },
-					{ name: '未通过', count: this.myContents.filter((c) => c.status === 'rejected').length }
+					{ name: '全部' },
+					{ name: '待审核' },
+					{ name: '已通过' },
+					{ name: '未通过' }
 				]
 			},
-			filtered() {
-				if (this.current === 0) return this.myContents
-				const map = { 1: 'pending', 2: 'approved', 3: 'rejected' }
-				return this.myContents.filter((c) => c.status === map[this.current])
+			emptyText() {
+				return ['这里还没有书帖', '暂无待审核的书帖', '暂无已通过的书帖', '暂无未通过的书帖'][this.current]
 			}
 		},
-		created() {
-			this._store = useContentStore()
-		},
-		onLoad(options) {
-			this._store = useContentStore()
-			this._store.init()
+		async onLoad(options) {
 			this.current = Number(options.tab || 0)
+			this.list = []
+			await this.loadList()
+		},
+		onShow() {
+			// 每次回到页面，刷新当前 tab 的真实数据
+			this.loadList()
 		},
 		methods: {
+			async switchTab(i) {
+				if (this.current === i) return
+				this.current = i
+				this.list = []
+				await this.loadList()
+			},
+			async loadList() {
+				if (this.loading) return
+				this.loading = true
+				try {
+					const status = TAB_STATUS[this.current] || ''
+					const res = await postApi.mine({ page: 1, pageSize: 50, status })
+					const arr = (res && (res.data))
+						|| (Array.isArray(res.data) ? res.data : [])
+					this.list = Array.isArray(arr) ? arr : []
+				} catch (e) {
+					console.warn('[records] loadList failed', e)
+				} finally {
+					this.loading = false
+				}
+			},
 			statusText,
 			statusClass
 		}
@@ -108,11 +132,6 @@
 		background: linear-gradient(145deg, $cinnabar-light, $cinnabar);
 		font-weight: 600;
 		box-shadow: 0 6rpx 16rpx rgba(7, 193, 96, 0.3);
-	}
-
-	.tab-count {
-		margin-left: 6rpx;
-		font-size: 22rpx;
 	}
 
 	.list {

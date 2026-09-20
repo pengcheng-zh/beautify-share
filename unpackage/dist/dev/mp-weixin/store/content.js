@@ -1,289 +1,377 @@
 "use strict";
 const common_vendor = require("../common/vendor.js");
 const store_user = require("./user.js");
-const K_CONTENTS = "xs_contents";
-const K_COMMENTS = "xs_comments";
-const K_MOCK_INITED = "xs_mock_inited";
-function dayAgo(days, hour = 10, minute = 30) {
-  const d = /* @__PURE__ */ new Date();
-  d.setDate(d.getDate() - days);
-  d.setHours(hour, minute, 0, 0);
-  return d.getTime();
+const common_api = require("../common/api.js");
+function asNumber(v, d = 0) {
+  if (typeof v === "number")
+    return v;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : d;
 }
-const MOCK_USERS = {
-  u1: { nickname: "若谷", sign: "一箪食，一瓢饮，在陋巷，不改其乐。", role: "admin", location: "杭州 · 运河书市" },
-  u2: { nickname: "拾遗", sign: "旧书有灵，往来皆是缘。", role: "member", location: "苏州 · 平江路旧书摊" },
-  u3: { nickname: "观澜", sign: "灯下摊开一本书，世界便静了。", role: "member", location: "苏州 · 平江路旧书摊" },
-  u4: { nickname: "清欢", sign: "满架古书，一室茶香。", role: "member", location: "北京 · 琉璃厂" },
-  u5: { nickname: "小满", sign: "给旧书找一位新主人。", role: "member", location: "南京 · 朝天宫旧书市" },
-  u6: { nickname: "沉鱼", sign: "浣花溪畔，以书会友。", role: "member", location: "成都 · 浣花溪旧书市" }
-};
-const MOCK_CONTENTS = [
-  {
-    id: "c1",
-    userId: "u2",
-    text: "周末运河书市淘到三本线装旧书，老板娘说是一位老先生搬离杭州时留下的。翻开扉页，有蝇头小楷题着赠言——书里有人的气息，这就是旧书的迷人之处。",
-    images: ["/static/mock/market-1.jpg", "/static/mock/books-1.jpg"],
-    voice: { path: "", duration: 8 },
-    location: { name: "杭州 · 运河书市", address: "拱墅区运河广场" },
-    createTime: dayAgo(0, 9, 12),
-    status: "approved",
-    likes: ["u1", "u3", "u5"],
-    favs: ["u1"],
-    shares: []
-  },
-  {
-    id: "c2",
-    userId: "u3",
-    text: "置换：《人间词话》人民文学出版社 83 年版，品相八五成新，换一本《浮生六记》旧版即可。有缘者来平江路旧书摊寻我，茶已泡好。",
-    images: ["/static/mock/books-2.jpg"],
-    voice: { path: "", duration: 5 },
-    location: { name: "苏州 · 平江路旧书摊", address: "平江路中段" },
-    createTime: dayAgo(1, 15, 40),
-    status: "approved",
-    likes: ["u1", "u2", "u4", "u6"],
-    favs: ["u6"],
-    shares: ["u1"]
-  },
-  {
-    id: "c3",
-    userId: "u4",
-    text: "雨夜无事，翻出前年在琉璃厂收的《夜航船》。张岱说：天下学问，惟夜航船中最难对付。今夜窗外雨声，倒也像极了一艘夜航船。",
-    images: [],
-    voice: { path: "", duration: 12 },
-    location: { name: "北京 · 琉璃厂", address: "西城区琉璃厂东街" },
-    createTime: dayAgo(2, 22, 5),
-    status: "approved",
-    likes: ["u1", "u3"],
-    favs: [],
-    shares: []
-  },
-  {
-    id: "c4",
-    userId: "u5",
-    text: "今日在朝天宫旧书市，给女儿找到全套《城南旧事》插图本，扉页还有原主人的铅笔签名。有些书，等一个人，等了许多年。",
-    images: ["/static/mock/market-2.jpg", "/static/mock/books-3.jpg", "/static/mock/market-3.jpg"],
-    voice: { path: "", duration: 0 },
-    location: { name: "南京 · 朝天宫旧书市", address: "秦淮区朝天宫街道" },
-    createTime: dayAgo(3, 11, 20),
-    status: "approved",
-    likes: ["u1", "u2", "u6"],
-    favs: ["u2"],
-    shares: []
-  },
-  {
-    id: "c5",
-    userId: "u6",
-    text: "收书。家父整理书房，腾出两箱八十年代的旧杂志与诗集，不舍得当废纸卖，想为它们找个好去处。浣花溪书市，周末摆摊，欢迎来看。",
-    images: ["/static/mock/books-4.jpg"],
-    voice: { path: "", duration: 7 },
-    location: { name: "成都 · 浣花溪旧书市", address: "青羊区浣花溪公园旁" },
-    createTime: dayAgo(4, 16, 45),
-    status: "approved",
-    likes: ["u1", "u4"],
-    favs: ["u1", "u3"],
-    shares: []
-  },
-  {
-    id: "c6",
-    userId: "u1",
-    text: "人间烟火，书市清灵。今日新到一摞连环画与地方志，摊位在运河边第三棵柳树下。也欢迎带自己的旧书来置换，以书会友，不亦乐乎。",
-    images: ["/static/mock/market-1.jpg", "/static/mock/market-3.jpg"],
-    voice: { path: "", duration: 9 },
-    location: { name: "杭州 · 运河书市", address: "拱墅区运河广场" },
-    createTime: dayAgo(5, 8, 30),
-    status: "approved",
-    likes: ["u2", "u3", "u5", "u6"],
-    favs: ["u4"],
-    shares: ["u3"]
-  },
-  {
-    id: "c7",
-    userId: "u2",
-    text: "（演示待审核内容）有人卖一本签名版《围城》，品相不错，就是价格虚高。这年头，收书的人越来越少，卖书的人越来越多。",
-    images: [],
-    voice: { path: "", duration: 0 },
-    location: { name: "杭州 · 运河书市", address: "拱墅区运河广场" },
-    createTime: dayAgo(1, 20, 15),
-    status: "pending",
-    likes: [],
-    favs: [],
-    shares: []
+function asBool(v) {
+  return v === true || v === "true" || v === 1 || v === "1";
+}
+function asTime(v) {
+  if (typeof v === "number")
+    return v;
+  if (!v)
+    return Date.now();
+  const t = new Date(v).getTime();
+  return Number.isFinite(t) ? t : Date.now();
+}
+function normalizePost(raw) {
+  if (!raw)
+    return null;
+  return {
+    id: raw.id,
+    userId: raw.userId,
+    text: raw.text || raw.content || "",
+    images: Array.isArray(raw.images) ? raw.images : [],
+    voice: raw.voice || {
+      path: raw.voicePath || raw.voiceUrl || "",
+      duration: asNumber(raw.voiceDuration)
+    },
+    location: raw.location || null,
+    createTime: asTime(raw.createTime),
+    status: raw.status || "approved",
+    likeCount: asNumber(raw.likeCount),
+    favoriteCount: asNumber(raw.favoriteCount),
+    commentCount: asNumber(raw.commentCount),
+    shareCount: asNumber(raw.shareCount),
+    liked: asBool(raw.liked),
+    favorited: asBool(raw.favorited),
+    recentLikers: Array.isArray(raw.recentLikers) ? raw.recentLikers : [],
+    user: raw.user || null
+  };
+}
+function normalizeComment(raw) {
+  if (!raw)
+    return null;
+  return {
+    id: raw.id,
+    postId: raw.postId,
+    userId: raw.userId,
+    text: raw.text || raw.content || "",
+    createTime: asTime(raw.createTime),
+    status: raw.status || "approved",
+    user: raw.user || null
+  };
+}
+function normalizeList(data) {
+  if (!data)
+    return [];
+  if (Array.isArray(data))
+    return data;
+  for (const key of ["list", "records", "rows", "items", "content"]) {
+    if (Array.isArray(data[key]))
+      return data[key];
   }
-];
-const MOCK_COMMENTS = [
-  { id: "m1", contentId: "c1", userId: "u3", text: "蝇头小楷的赠言，最见旧书的风骨。", createTime: dayAgo(0, 10, 2), status: "approved" },
-  { id: "m2", contentId: "c1", userId: "u5", text: "运河书市好久没去了，周末约起！", createTime: dayAgo(0, 11, 20), status: "approved" },
-  { id: "m3", contentId: "c2", userId: "u2", text: "我有《浮生六记》旧版，明日带过去。", createTime: dayAgo(1, 16, 10), status: "approved" },
-  { id: "m4", contentId: "c2", userId: "u6", text: "（演示待审核评论）广告位招租，书摊前排请联系我。", createTime: dayAgo(1, 18, 30), status: "pending" },
-  { id: "m5", contentId: "c6", userId: "u4", text: "以书会友，深以为然。改日南下拜访。", createTime: dayAgo(5, 9, 12), status: "approved" }
-];
-function clone(obj) {
-  return JSON.parse(JSON.stringify(obj));
+  return [];
 }
 const useContentStore = common_vendor.defineStore("content", {
   state: () => ({
-    contents: [],
-    comments: [],
-    users: clone(MOCK_USERS)
+    /* 信息流 */
+    feed: [],
+    feedPage: 0,
+    feedHasMore: true,
+    feedLoading: false,
+    /* 我的发布 */
+    mine: [],
+    minePage: 0,
+    mineHasMore: true,
+    mineLoading: false,
+    /* 详情缓存：id -> post */
+    details: {},
+    /* 评论缓存：postId -> { list, page, hasMore, loading } */
+    comments: {},
+    commentsVersion: 0,
+    /* 待审核内容（无后端端点前保持空集） */
+    pendingContents: [],
+    pendingComments: [],
+    /* 个人操作痕迹（本端仅用于『我的点赞/收藏/分享』页面） */
+    likedIds: [],
+    favoritedIds: [],
+    sharedIds: [],
+    /* 用户信息缓存：userId -> user */
+    users: {}
   }),
   getters: {
-    approvedContents: (state) => state.contents.filter((c) => c.status === "approved").sort((a, b) => b.createTime - a.createTime),
-    pendingContents: (state) => state.contents.filter((c) => c.status === "pending"),
-    approvedComments: (state) => state.comments.filter((c) => c.status === "approved"),
-    pendingComments: (state) => state.comments.filter((c) => c.status === "pending")
+    approvedContents: (state) => state.feed.slice()
   },
   actions: {
-    init() {
-      let inited = false;
+    /* ==================== 信息流 ==================== */
+    async loadFeed({ page = 1, pageSize = 10, refresh = false } = {}) {
+      if (this.feedLoading)
+        return [];
+      this.feedLoading = true;
       try {
-        inited = !!common_vendor.index.getStorageSync(K_MOCK_INITED);
-      } catch (e) {
-      }
-      try {
-        this.contents = common_vendor.index.getStorageSync(K_CONTENTS) || [];
-      } catch (e) {
-        this.contents = [];
-      }
-      try {
-        this.comments = common_vendor.index.getStorageSync(K_COMMENTS) || [];
-      } catch (e) {
-        this.comments = [];
-      }
-      if (!inited && this.contents.length === 0) {
-        this.contents = clone(MOCK_CONTENTS);
-        this.comments = clone(MOCK_COMMENTS);
-        this.persist();
-        try {
-          common_vendor.index.setStorageSync(K_MOCK_INITED, true);
-        } catch (e) {
+        const res = await common_api.postApi.feed({ page, pageSize });
+        const list = res && res.data || res.data || [];
+        if (refresh) {
+          this.feed = list;
+        } else {
+          this.feed = this.feed.concat(list);
         }
-      }
-    },
-    persist() {
-      try {
-        common_vendor.index.setStorageSync(K_CONTENTS, this.contents);
-        common_vendor.index.setStorageSync(K_COMMENTS, this.comments);
+        this.feedPage = page;
+        this.feedHasMore = list.length >= pageSize;
+        this.cacheUsersFromPosts(list);
+        return list;
       } catch (e) {
+        common_vendor.index.showToast({ title: "信息加载失败", icon: "none" });
+        return [];
+      } finally {
+        this.feedLoading = false;
       }
     },
-    getContent(id) {
-      return this.contents.find((c) => c.id === id) || null;
+    async refreshFeed() {
+      return this.loadFeed({ page: 1, refresh: true });
     },
-    getUser(id) {
+    /* ==================== 详情 ==================== */
+    async getContent(id) {
+      const found = this._findPost(id);
+      if (found)
+        return found;
+      try {
+        const data = await common_api.postApi.detail(id);
+        const detail = normalizePost(data);
+        if (detail) {
+          this.details[id] = detail;
+          this.cacheUsersFromPosts([detail]);
+        }
+        return detail;
+      } catch (e) {
+        return null;
+      }
+    },
+    /* ==================== 点赞 / 收藏 / 分享 ==================== */
+    async toggleLike(id) {
+      const post = this._findPost(id);
+      const wasLiked = !!(post && post.liked);
+      if (post) {
+        post.liked = !wasLiked;
+        post.likeCount = Math.max(0, asNumber(post.likeCount) + (wasLiked ? -1 : 1));
+      }
+      try {
+        await common_api.postApi.like(id);
+        if (wasLiked) {
+          this.likedIds = this.likedIds.filter((x) => String(x) !== String(id));
+        } else if (!this.likedIds.some((x) => String(x) === String(id))) {
+          this.likedIds.push(id);
+        }
+      } catch (e) {
+        if (post) {
+          post.liked = wasLiked;
+          post.likeCount = Math.max(0, asNumber(post.likeCount) + (wasLiked ? 1 : -1));
+        }
+        common_vendor.index.showToast({ title: "点赞失败，请稍后再试", icon: "none" });
+      }
+    },
+    async toggleFav(id) {
+      const post = this._findPost(id);
+      const wasFav = !!(post && post.favorited);
+      if (post) {
+        post.favorited = !wasFav;
+        post.favoriteCount = Math.max(0, asNumber(post.favoriteCount) + (wasFav ? -1 : 1));
+      }
+      try {
+        await common_api.postApi.favorite(id);
+        if (wasFav) {
+          this.favoritedIds = this.favoritedIds.filter((x) => String(x) !== String(id));
+        } else if (!this.favoritedIds.some((x) => String(x) === String(id))) {
+          this.favoritedIds.push(id);
+        }
+      } catch (e) {
+        if (post) {
+          post.favorited = wasFav;
+          post.favoriteCount = Math.max(0, asNumber(post.favoriteCount) + (wasFav ? 1 : -1));
+        }
+        common_vendor.index.showToast({ title: "收藏失败，请稍后再试", icon: "none" });
+      }
+    },
+    recordShare(id) {
+      const post = this._findPost(id);
+      if (post)
+        post.shareCount = asNumber(post.shareCount) + 1;
+      if (!this.sharedIds.some((x) => String(x) === String(id))) {
+        this.sharedIds.push(id);
+      }
+    },
+    /* ==================== 评论 ==================== */
+    async getCommentsOf(postId, { page = 1, pageSize = 20, refresh = false } = {}) {
+      const key = String(postId);
+      if (!this.comments[key]) {
+        this.comments[key] = { list: [], page: 0, hasMore: true, loading: false };
+      }
+      const bucket = this.comments[key];
+      if (bucket.loading)
+        return bucket.list;
+      if (!refresh && !bucket.hasMore)
+        return bucket.list;
+      bucket.loading = true;
+      try {
+        const data = await common_api.commentApi.list({ postId, page, pageSize });
+        const list = normalizeList(data).map(normalizeComment).filter(Boolean);
+        if (refresh) {
+          bucket.list = list;
+        } else {
+          bucket.list = bucket.list.concat(list);
+        }
+        bucket.page = page;
+        bucket.hasMore = list.length >= pageSize;
+        this.cacheUsersFromComments(list);
+        this.commentsVersion++;
+        return bucket.list;
+      } catch (e) {
+        common_vendor.index.showToast({ title: "评论加载失败", icon: "none" });
+        return bucket.list;
+      } finally {
+        bucket.loading = false;
+      }
+    },
+    async addComment(postId, text) {
+      try {
+        await common_api.commentApi.create({ postId, text });
+        const post = this._findPost(postId);
+        if (post)
+          post.commentCount = asNumber(post.commentCount) + 1;
+        await this.getCommentsOf(postId, { page: 1, refresh: true });
+        return true;
+      } catch (e) {
+        common_vendor.index.showToast({ title: e && e.message || "评论失败", icon: "none" });
+        return false;
+      }
+    },
+    async removeComment(commentId, postId) {
+      try {
+        await common_api.commentApi.delete(commentId);
+        const key = String(postId);
+        if (this.comments[key]) {
+          this.comments[key].list = this.comments[key].list.filter(
+            (c) => String(c.id) !== String(commentId)
+          );
+          this.commentsVersion++;
+        }
+        const post = this._findPost(postId);
+        if (post)
+          post.commentCount = Math.max(0, asNumber(post.commentCount) - 1);
+        return true;
+      } catch (e) {
+        common_vendor.index.showToast({ title: "删除失败", icon: "none" });
+        return false;
+      }
+    },
+    /* ==================== 我的发布 ==================== */
+    async loadMine({ page = 1, pageSize = 10, refresh = false } = {}) {
+      if (this.mineLoading)
+        return [];
+      this.mineLoading = true;
+      try {
+        const data = await common_api.postApi.mine({ page, pageSize });
+        const list = normalizeList(data).map(normalizePost).filter(Boolean);
+        if (refresh) {
+          this.mine = list;
+        } else {
+          this.mine = this.mine.concat(list);
+        }
+        this.minePage = page;
+        this.mineHasMore = list.length >= pageSize;
+        this.cacheUsersFromPosts(list);
+        return list;
+      } catch (e) {
+        common_vendor.index.showToast({ title: "我的发布加载失败", icon: "none" });
+        return [];
+      } finally {
+        this.mineLoading = false;
+      }
+    },
+    async refreshMine() {
+      return this.loadMine({ page: 1, refresh: true });
+    },
+    /* ==================== 兼容旧调用入口 ==================== */
+    /**
+     * 保留 init() 是为了兼容老页面；实际只触发信息流刷新
+     */
+    init() {
+      this.refreshFeed();
+    },
+    /* ==================== 本地操作（无后端端点前的占位） ==================== */
+    /**
+     * 发布：后端暂未提供 /post/create 接口，
+     * 这里先做本地乐观创建以保持发布流程可用；待接口到位后接入。
+     */
+    publish(payload) {
       const userStore = store_user.useUserStore();
-      if (userStore.user && userStore.user.id === id) {
+      const id = "local_" + Date.now();
+      const post = normalizePost({
+        id,
+        userId: userStore.user ? userStore.user.id : "",
+        text: payload.text,
+        images: payload.images,
+        voice: payload.voice,
+        location: payload.location,
+        createTime: Date.now(),
+        status: "pending",
+        user: userStore.user
+      });
+      this.mine.unshift(post);
+      return post;
+    },
+    /**
+     * 审核：后端未提供审核接口，先本地状态翻转
+     */
+    auditContent(id, status) {
+      const c = this._findPost(id);
+      if (c)
+        c.status = status;
+      this.pendingContents = this.pendingContents.filter((x) => String(x.id) !== String(id));
+    },
+    auditComment(id, status) {
+      this.pendingComments = this.pendingComments.filter((x) => String(x.id) !== String(id));
+    },
+    /* ==================== 个人数据 getters ==================== */
+    myContents() {
+      return this.mine.slice().sort((a, b) => b.createTime - a.createTime);
+    },
+    myLiked() {
+      return this.likedIds.map((id) => this._findPost(id)).filter(Boolean);
+    },
+    myFavorited() {
+      return this.favoritedIds.map((id) => this._findPost(id)).filter(Boolean);
+    },
+    myShared() {
+      return this.sharedIds.map((id) => this._findPost(id)).filter(Boolean);
+    },
+    /* ==================== 用户信息 ==================== */
+    getUser(id) {
+      if (!id)
+        return { id: "", nickname: "无名书友", sign: "", location: "", avatar: "" };
+      const userStore = store_user.useUserStore();
+      if (userStore.user && String(userStore.user.id) === String(id)) {
         return { ...userStore.user };
       }
       const u = this.users[id];
-      return u ? { id, ...u } : { id, nickname: "无名书友", sign: "", location: "" };
+      if (u)
+        return { id, ...u };
+      return { id, nickname: "无名书友", sign: "", location: "", avatar: "" };
     },
-    getCommentsOf(contentId) {
-      return this.comments.filter((c) => c.contentId === contentId).sort((a, b) => a.createTime - b.createTime);
+    cacheUsersFromPosts(posts) {
+      posts.forEach((p) => {
+        if (p && p.userId && p.user) {
+          this.users[p.userId] = { ...this.users[p.userId] || {}, ...p.user };
+        }
+      });
     },
-    /* 发布：默认进入待审核 */
-    publish({ text = "", images = [], voice = null, location = null }) {
-      const userStore = store_user.useUserStore();
-      const content = {
-        id: "c" + Date.now(),
-        userId: userStore.user ? userStore.user.id : "u1",
-        text,
-        images: images || [],
-        voice: voice || { path: "", duration: 0 },
-        location: location || null,
-        createTime: Date.now(),
-        status: "pending",
-        likes: [],
-        favs: [],
-        shares: []
-      };
-      this.contents.unshift(content);
-      this.persist();
-      return content;
+    cacheUsersFromComments(comments) {
+      comments.forEach((c) => {
+        if (c && c.userId && c.user) {
+          this.users[c.userId] = { ...this.users[c.userId] || {}, ...c.user };
+        }
+      });
     },
-    toggleLike(contentId) {
-      const c = this.getContent(contentId);
-      if (!c)
-        return;
-      const uid = this.me().id;
-      const idx = c.likes.indexOf(uid);
-      if (idx > -1)
-        c.likes.splice(idx, 1);
-      else
-        c.likes.push(uid);
-      this.persist();
-    },
-    toggleFav(contentId) {
-      const c = this.getContent(contentId);
-      if (!c)
-        return;
-      const uid = this.me().id;
-      const idx = c.favs.indexOf(uid);
-      if (idx > -1)
-        c.favs.splice(idx, 1);
-      else
-        c.favs.push(uid);
-      this.persist();
-    },
-    recordShare(contentId) {
-      const c = this.getContent(contentId);
-      if (!c)
-        return;
-      const uid = this.me().id;
-      if (c.shares.indexOf(uid) === -1)
-        c.shares.push(uid);
-      this.persist();
-    },
-    addComment(contentId, text) {
-      const cm = {
-        id: "m" + Date.now(),
-        contentId,
-        userId: this.me().id,
-        text,
-        createTime: Date.now(),
-        status: "pending"
-      };
-      this.comments.push(cm);
-      this.persist();
-      return cm;
-    },
-    auditContent(contentId, status) {
-      const c = this.getContent(contentId);
-      if (!c)
-        return;
-      c.status = status;
-      this.persist();
-    },
-    auditComment(commentId, status) {
-      const cm = this.comments.find((x) => x.id === commentId);
-      if (!cm)
-        return;
-      cm.status = status;
-      this.persist();
-    },
-    /* 我的数据 */
-    myContents() {
-      const uid = this.me().id;
-      return this.contents.filter((c) => c.userId === uid).sort((a, b) => b.createTime - a.createTime);
-    },
-    myLiked() {
-      const uid = this.me().id;
-      return this.contents.filter((c) => c.likes.indexOf(uid) > -1);
-    },
-    myFavorited() {
-      const uid = this.me().id;
-      return this.contents.filter((c) => c.favs.indexOf(uid) > -1);
-    },
-    myShared() {
-      const uid = this.me().id;
-      return this.contents.filter((c) => c.shares.indexOf(uid) > -1);
-    },
-    me() {
-      const userStore = store_user.useUserStore();
-      if (userStore.user)
-        return userStore.user;
-      userStore.login();
-      return userStore.user;
+    /* ==================== 内部工具 ==================== */
+    _findPost(id) {
+      const sid = String(id);
+      return this.feed.find((c) => String(c.id) === sid) || this.mine.find((c) => String(c.id) === sid) || this.details[sid] || null;
     }
   }
 });

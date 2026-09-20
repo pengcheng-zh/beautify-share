@@ -1,6 +1,7 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
 const store_content = require("../../store/content.js");
+const common_api = require("../../common/api.js");
 const _sfc_main = {
   data() {
     return {
@@ -8,6 +9,7 @@ const _sfc_main = {
       images: [],
       voice: { path: "", duration: 0 },
       location: null,
+      submitting: false,
       recording: false,
       recordSeconds: 0,
       recordTimer: null,
@@ -21,7 +23,7 @@ const _sfc_main = {
       this.contentStore = store_content.useContentStore();
       this.contentStore.init();
     } catch (e) {
-      common_vendor.index.__f__("error", "at pages/publish/publish.vue:99", "contentStore init failed", e);
+      common_vendor.index.__f__("error", "at pages/publish/publish.vue:101", "contentStore init failed", e);
     }
   },
   onUnload() {
@@ -170,16 +172,49 @@ const _sfc_main = {
         common_vendor.index.showToast({ title: "写点什么吧", icon: "none" });
         return;
       }
-      this.contentStore.publish({
-        text: this.text.trim(),
-        images: this.images,
-        voice: this.voice,
-        location: this.location
-      });
-      common_vendor.index.showToast({ title: "已呈上，待掌柜审核", icon: "none" });
-      setTimeout(() => {
-        common_vendor.index.navigateBack();
-      }, 1200);
+      if (this.submitting)
+        return;
+      this.submitting = true;
+      this.doSubmit();
+    },
+    async doSubmit() {
+      common_vendor.index.showLoading({ title: "呈递中", mask: true });
+      try {
+        const pictures = [];
+        for (const img of this.images) {
+          const url = await common_api.uploadApi.uploadFile(img);
+          pictures.push(url);
+        }
+        common_vendor.index.__f__("log", "at pages/publish/publish.vue:265", "this.voice", this.voice);
+        let voiceUrl = "";
+        let voiceDuration = 0;
+        if (this.voice.path && this.voice.duration) {
+          voiceUrl = await common_api.uploadApi.uploadFile(this.voice.path);
+          voiceDuration = this.voice.duration;
+        }
+        const payload = {
+          content: this.text.trim(),
+          pictures,
+          location: this.location ? this.location.name || "" : "",
+          latitude: this.location ? String(this.location.lat || "") : "",
+          longitude: this.location ? String(this.location.lng || "") : "",
+          voice: voiceUrl,
+          duration: voiceDuration
+        };
+        await common_api.postApi.create(payload);
+        common_vendor.index.hideLoading();
+        common_vendor.index.showToast({ title: "已呈上，待掌柜审核", icon: "none" });
+        setTimeout(() => {
+          common_vendor.index.navigateBack();
+        }, 1200);
+      } catch (e) {
+        this.submitting = false;
+        common_vendor.index.hideLoading();
+        common_vendor.index.showToast({
+          title: e && e.message || "呈递失败，请重试",
+          icon: "none"
+        });
+      }
     }
   }
 };

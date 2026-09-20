@@ -13,7 +13,6 @@ const _sfc_main = {
   },
   onShow() {
     this._store = store_content.useContentStore();
-    this._store.init();
     this.list = this._store.myShared();
   }
 };

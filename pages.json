@@ -18,7 +18,7 @@
     {
       "path": "pages/tabBar/books/books",
       "style": {
-        "navigationBarTitleText": "书斋",
+        "navigationBarTitleText": "贤书",
         "navigationBarBackgroundColor": "#FFFFFF",
         "navigationBarTextStyle": "black",
         "enablePullDownRefresh": true,
@@ -121,7 +121,7 @@
         "pagePath": "pages/tabBar/books/books",
         "iconPath": "static/tab/books.png",
         "selectedIconPath": "static/tab/books-active.png",
-        "text": "书斋"
+        "text": "贤书"
       },
       {
         "pagePath": "pages/tabBar/mine/mine",

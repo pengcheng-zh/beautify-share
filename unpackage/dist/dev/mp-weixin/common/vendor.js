@@ -6242,7 +6242,7 @@ function populateParameters(fromRes, toRes) {
   let _SDKVersion = SDKVersion;
   const hostLanguage = (language || "").replace(/_/g, "-");
   const parameters = {
-    appId: "",
+    appId: "wx190bc027cbef4455",
     appName: "贤书·置换",
     appVersion: "1.0.0",
     appVersionCode: "100",
@@ -6397,7 +6397,7 @@ const getAppBaseInfo = {
     let _hostName = getHostName(fromRes);
     let hostLanguage = (language || "").replace(/_/g, "-");
     const parameters = {
-      appId: "",
+      appId: "wx190bc027cbef4455",
       appName: "贤书·置换",
       appVersion: "1.0.0",
       appVersionCode: "100",
@@ -7206,7 +7206,7 @@ function isConsoleWritable() {
 }
 const UNI_CONSOLE_RUNTIME_PROMISE = "__uni_console_runtime_promise__";
 function initRuntimeSocketService() {
-  const hosts = "127.0.0.1,192.168.0.130";
+  const hosts = "127.0.0.1,192.168.0.106";
   const port = "8090";
   const id = "mp-weixin_4hcdXl";
   const runtimeGlobal = getRuntimeGlobal();
@@ -8871,5 +8871,6 @@ exports.n = n;
 exports.o = o;
 exports.p = p;
 exports.resolveComponent = resolveComponent;
+exports.setActivePinia = setActivePinia;
 exports.t = t;
 //# sourceMappingURL=../../.sourcemap/mp-weixin/common/vendor.js.map
